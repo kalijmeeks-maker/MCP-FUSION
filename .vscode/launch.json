@@ -1,0 +1,133 @@
+{
+  "version": "0.2.0",
+  "tasks": [
+    {
+      "label": "venv-check",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "${workspaceFolder}/scripts/load_env.sh && test -f ${workspaceFolder}/workspace/.venv/bin/python && echo '[VENV] Ready to debug'"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Router",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/broker/router.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - ChatGPT Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/agents/chatgpt/worker.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Grok Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/agents/grok/worker.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Judge Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/agents/judge/worker.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Grok Results Listener",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/sim/grok_results_listener.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Orchestrator",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/sim/orchestrator.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "MCP-FUSION: Full Stack (Local)",
+      "configurations": [
+        "Python: MCP-FUSION - Router",
+        "Python: MCP-FUSION - ChatGPT Worker",
+        "Python: MCP-FUSION - Grok Worker",
+        "Python: MCP-FUSION - Judge Worker",
+        "Python: MCP-FUSION - Grok Results Listener",
+        "Python: MCP-FUSION - Orchestrator"
+      ],
+      "stopAll": true
+    }
+  ]
+}

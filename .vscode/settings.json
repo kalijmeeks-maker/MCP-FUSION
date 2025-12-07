@@ -1,0 +1,22 @@
+{
+  // WARNING: Enabling global auto-approval for terminal tools is potentially
+  // dangerous. This workspace setting will allow automated tools to run
+  // the listed terminal commands without additional manual confirmation.
+  // Proceed only if you understand the risk.
+  "chat.tools.global.autoApprove": true,
+
+  "chat.tools.terminal.autoApprove": {
+    "rm": true,
+    "rmdir": true,
+    "del": true,
+    "kill": true,
+    "curl": true,
+    "wget": true,
+    "eval": true,
+    "chmod": true,
+    "chown": true,
+    "/^Remove-Item\\b/i": true
+  },
+
+  "chat.tools.terminal.autoReplyToPrompts": true
+}

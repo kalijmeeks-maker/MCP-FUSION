@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+set -e
+
+# Get the repo root by finding where this script lives
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_ROOT="$SCRIPT_DIR"
+BASE_DIR="$REPO_ROOT/workspace"
+
+echo "[LAUNCH] MCP-FUSION repo root: $REPO_ROOT"
+echo "[LAUNCH] MCP-FUSION workspace: $BASE_DIR"
+cd "$BASE_DIR"
+
+# --------------------
+# Activate virtualenv
+# --------------------
+if [ -f ".venv/bin/activate" ]; then
+    echo "[LAUNCH] Activating virtualenv .venv"
+    source ".venv/bin/activate"
+else
+    echo "[ERROR] .venv not found at $BASE_DIR/.venv"
+    echo "[INFO] Create it with: python3 -m venv $BASE_DIR/.venv && $BASE_DIR/.venv/bin/pip install -r requirements.txt"
+    exit 1
+fi
+
+# --------------------
+# Load .env if present
+# --------------------
+load_env() {
+    local env_loader="$REPO_ROOT/scripts/load_env.sh"
+    if [ -f "$env_loader" ]; then
+        source "$env_loader"
+    else
+        echo "[ERROR] Env loader script not found at $env_loader"
+        exit 1
+    fi
+}
+
+# --------------------
+# Validate keys (structure only)
+# --------------------
+validate_keys() {
+    local ok=1
+
+    if [ -z "$OPENAI_API_KEY" ]; then
+        echo "[ERROR] OPENAI_API_KEY is not set. Add it to $BASE_DIR/.env"
+        ok=0
+    elif [[ "$OPENAI_API_KEY" == "YOUR_REAL_OPENAI_KEY_HERE" ]]; then
+        echo "[ERROR] OPENAI_API_KEY still has placeholder value in .env"
+        ok=0
+    elif [[ ! "$OPENAI_API_KEY" == sk-* ]]; then
+        echo "[WARN] OPENAI_API_KEY does not start with 'sk-'. Double-check it's correct."
+    fi
+
+    if [ -z "$XAI_API_KEY" ]; then
+        echo "[ERROR] XAI_API_KEY is not set. Add it to $BASE_DIR/.env"
+        ok=0
+    elif [[ "$XAI_API_KEY" == "YOUR_REAL_XAI_KEY_HERE" ]]; then
+        echo "[ERROR] XAI_API_KEY still has placeholder value in .env"
+        ok=0
+    elif [[ ! "$XAI_API_KEY" == xai-* ]]; then
+        echo "[WARN] XAI_API_KEY does not start with 'xai-'. Double-check it's correct."
+    fi
+
+    # PERPLEXITY optional for now; warn if placeholder
+    if [[ "$PERPLEXITY_API_KEY" == "YOUR_REAL_PERPLEXITY_KEY_HERE" ]]; then
+        echo "[WARN] PERPLEXITY_API_KEY still has placeholder value in .env (optional right now)."
+    fi
+
+    if [ $ok -eq 0 ]; then
+        echo "[LAUNCH] Key validation failed. Fix .env and re-run."
+        exit 1
+    fi
+}
+
+# --------------------
+# Start services
+# --------------------
+start_services() {
+    export PYTHONPATH="$BASE_DIR:$PYTHONPATH"
+    echo "[LAUNCH] PYTHONPATH=$PYTHONPATH"
+    echo "[LAUNCH] Starting services..."
+
+    python3 broker/router.py &
+    BROKER_PID=$!
+    echo "[LAUNCH] broker/router.py (PID: $BROKER_PID)"
+
+    python3 agents/chatgpt/worker.py &
+    CHATGPT_PID=$!
+    echo "[LAUNCH] agents/chatgpt/worker.py (PID: $CHATGPT_PID)"
+
+    python3 agents/grok/worker.py &
+    GROK_PID=$!
+    echo "[LAUNCH] agents/grok/worker.py (PID: $GROK_PID)"
+
+    python3 agents/judge/worker.py &
+    JUDGE_PID=$!
+    echo "[LAUNCH] agents/judge/worker.py (PID: $JUDGE_PID)"
+
+    python3 sim/grok_results_listener.py &
+    LISTENER_PID=$!
+    echo "[LAUNCH] sim/grok_results_listener.py (PID: $LISTENER_PID)"
+
+    echo "[LAUNCH] All background workers online."
+    echo "[LAUNCH] Starting orchestrator (foreground)..."
+
+    # Clean up on exit
+    cleanup() {
+        echo "[LAUNCH] Shutting down MCP-FUSION services..."
+        kill "$BROKER_PID" "$CHATGPT_PID" "$GROK_PID" "$JUDGE_PID" "$LISTENER_PID" 2>/dev/null || true
+    }
+    trap cleanup EXIT
+
+    python3 sim/orchestrator.py
+}
+
+# --------------------
+# Stop services (reload/stop)
+# --------------------
+stop_services() {
+    echo "[LAUNCH] Stopping any existing MCP-FUSION python processes..."
+    pkill -f "broker/router.py" 2>/dev/null || true
+    pkill -f "agents/chatgpt/worker.py" 2>/dev/null || true
+    pkill -f "agents/grok/worker.py" 2>/dev/null || true
+    pkill -f "agents/judge/worker.py" 2>/dev/null || true
+    pkill -f "sim/grok_results_listener.py" 2>/dev/null || true
+    pkill -f "sim/orchestrator.py" 2>/dev/null || true
+    echo "[LAUNCH] Stop signal sent."
+}
+
+# --------------------
+# Command-line modes
+# --------------------
+COMMAND="${1:-start}"
+
+case "$COMMAND" in
+    start)
+        load_env
+        validate_keys
+        start_services
+        ;;
+    reload)
+        echo "[LAUNCH] RELOAD requested: stopping + reloading .env + restarting services."
+        stop_services
+        load_env
+        validate_keys
+        start_services
+        ;;
+    stop)
+        stop_services
+        ;;
+    *)
+        echo "Usage: $0 [start|reload|stop]"
+        exit 1
+        ;;
+esac
