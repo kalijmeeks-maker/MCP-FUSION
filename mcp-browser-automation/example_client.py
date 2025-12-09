@@ -60,7 +60,12 @@ def send_request(method: str, params: dict = None, request_id: int = 1):
         
     except subprocess.TimeoutExpired:
         print("❌ Request timed out")
-        process.kill()
+        # Gracefully terminate first, then force kill if needed
+        process.terminate()
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            process.kill()
         return None
     except json.JSONDecodeError as e:
         print(f"❌ Failed to parse response: {e}")

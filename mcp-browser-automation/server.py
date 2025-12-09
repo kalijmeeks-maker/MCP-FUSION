@@ -31,7 +31,14 @@ class MCPBrowserAutomationServer:
         self.playwright = None
         # Get configuration from environment variables
         self.headless = os.getenv("BROWSER_HEADLESS", "true").lower() == "true"
-        self.timeout = int(os.getenv("BROWSER_TIMEOUT", "30000"))
+        
+        # Parse timeout with error handling
+        try:
+            self.timeout = int(os.getenv("BROWSER_TIMEOUT", "30000"))
+        except ValueError:
+            logger.warning("Invalid BROWSER_TIMEOUT value, using default 30000ms")
+            self.timeout = 30000
+            
         self.user_agent = os.getenv("BROWSER_USER_AGENT", "")
 
     async def initialize(self):
@@ -236,6 +243,16 @@ class MCPBrowserAutomationServer:
 
                 except json.JSONDecodeError as e:
                     logger.error(f"Invalid JSON: {e}")
+                    # Send error response to client
+                    error_response = {
+                        "jsonrpc": "2.0",
+                        "id": None,
+                        "error": {
+                            "code": -32700,
+                            "message": f"Parse error: {str(e)}",
+                        },
+                    }
+                    print(json.dumps(error_response), flush=True)
                 except Exception as e:
                     logger.error(f"Error processing request: {e}")
 
