@@ -1,0 +1,170 @@
+# MCP Browser Automation Server Catalog Definition
+# This file defines the server registration in the MCP registry
+
+apiVersion: mcp.io/v1
+kind: Server
+metadata:
+  name: mcp-browser-automation
+  description: Browser automation server using Playwright for web scraping and content extraction
+  version: 1.0.0
+  author: MCP-FUSION Team
+  license: MIT
+  tags:
+    - browser
+    - automation
+    - playwright
+    - web-scraping
+    - content-extraction
+
+spec:
+  # Server runtime configuration
+  runtime:
+    type: python
+    version: ">=3.10"
+    entrypoint: server.py
+
+  # Container image configuration
+  container:
+    image: mcp-browser-automation:latest
+    pullPolicy: IfNotPresent
+
+  # Capabilities provided by this server
+  capabilities:
+    - name: navigate_and_extract
+      description: Navigate to a URL and extract page title, content, and metadata
+      parameters:
+        - name: url
+          type: string
+          required: true
+          description: The URL to navigate to (must start with http:// or https://)
+      returns:
+        type: object
+        properties:
+          success:
+            type: boolean
+            description: Whether the operation was successful
+          title:
+            type: string
+            description: Page title
+          content:
+            type: string
+            description: Full HTML content (limited to 10000 chars)
+          text_content:
+            type: string
+            description: Plain text content from page body (limited to 5000 chars)
+          metadata:
+            type: object
+            description: Additional metadata (URL, status, headers)
+          error:
+            type: string
+            description: Error message if success is false
+
+    - name: list_capabilities
+      description: List all available server capabilities
+      parameters: []
+      returns:
+        type: object
+        properties:
+          capabilities:
+            type: array
+            description: List of capability names
+          version:
+            type: string
+            description: Server version
+          description:
+            type: string
+            description: Server description
+
+  # Environment variables and configuration
+  configuration:
+    environment:
+      - name: BROWSER_HEADLESS
+        description: Run browser in headless mode
+        default: "true"
+        required: false
+
+      - name: BROWSER_TIMEOUT
+        description: Page load timeout in milliseconds
+        default: "30000"
+        required: false
+
+      - name: BROWSER_USER_AGENT
+        description: Custom user agent string (optional)
+        default: ""
+        required: false
+
+  # Security and resource constraints
+  security:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+    requests:
+      memory: 512Mi
+      cpu: 500m
+
+  # Health checks
+  health:
+    readinessProbe:
+      type: exec
+      command: ["python", "-c", "import sys; sys.exit(0)"]
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+    livenessProbe:
+      type: exec
+      command: ["python", "-c", "import sys; sys.exit(0)"]
+      initialDelaySeconds: 15
+      periodSeconds: 20
+
+  # Communication protocol
+  protocol:
+    type: stdio
+    encoding: json-rpc
+    version: "2.0"
+
+# Usage examples
+examples:
+  - name: Extract page content
+    description: Navigate to a URL and extract its title and content
+    request:
+      jsonrpc: "2.0"
+      id: 1
+      method: navigate_and_extract
+      params:
+        url: "https://example.com"
+    response:
+      jsonrpc: "2.0"
+      id: 1
+      result:
+        success: true
+        title: "Example Domain"
+        content: "<!DOCTYPE html>..."
+        text_content: "Example Domain..."
+        metadata:
+          url: "https://example.com/"
+          status: 200
+          status_text: "OK"
+
+  - name: List capabilities
+    description: Get list of available server capabilities
+    request:
+      jsonrpc: "2.0"
+      id: 2
+      method: list_capabilities
+      params: {}
+    response:
+      jsonrpc: "2.0"
+      id: 2
+      result:
+        capabilities: ["navigate_and_extract"]
+        version: "1.0.0"
+        description: "MCP Browser Automation Server"
