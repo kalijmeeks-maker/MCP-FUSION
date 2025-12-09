@@ -38,6 +38,7 @@ cd /Users/kalimeeks/MCP-FUSION
 ```
 
 Notes:
+
 - The helper verifies the hub path exists and `cd`s into it.
 - If the `gemini` CLI is on your `PATH`, the helper forwards all provided arguments to it, e.g.:
 
@@ -155,13 +156,16 @@ The MCP-FUSION project follows a modular architecture:
 This repository is designed to work with AI agents following the **Fusion Agent** paradigm:
 
 ### Main Fusion Agent
+
 Located at `/prompts/fusion_agent.md`, this is the primary prompt for GitHub Copilot and other AI assistants. It defines:
+
 - Agent identity and mission
 - Sub-agent roles and capabilities
 - Working styles and safety guidelines
 - Execution modes (Architect, Coder, Critic, Scribe, Fusion)
 
 ### Sub-Agents (Conceptual Roles)
+
 1. **Wealth Agent** - Financial analysis and data structuring
 2. **Ops Agent** - Workflow automation with Notion/Slack/n8n
 3. **Critic Agent** - Code review and quality assessment
@@ -169,6 +173,7 @@ Located at `/prompts/fusion_agent.md`, this is the primary prompt for GitHub Cop
 5. **Scribe Agent** - Documentation and session summaries
 
 ### Using the Fusion Agent
+
 ```bash
 # View the mega prompt
 cat prompts/fusion_agent.md
@@ -180,13 +185,16 @@ cat prompts/fusion_agent.md
 ## GitHub Templates
 
 ### Issue Templates
+
 - **Bug Report** (`.github/ISSUE_TEMPLATE/bug_report.yml`) - Report bugs with structured format
 - **Feature Request** (`.github/ISSUE_TEMPLATE/feature_request.yml`) - Suggest new features
 - **Task** (`.github/ISSUE_TEMPLATE/task.yml`) - Create executable tasks with plans
 - **Agent Session** (`.github/ISSUE_TEMPLATE/session.yml`) - Track AI agent work sessions
 
 ### Pull Request Template
+
 Located at `.github/PULL_REQUEST_TEMPLATE.md`, includes:
+
 - Summary and changes made
 - Category classification
 - Testing steps and checklist
@@ -196,12 +204,14 @@ Located at `.github/PULL_REQUEST_TEMPLATE.md`, includes:
 ## Documentation
 
 All documentation lives in `/docs`:
+
 - **[context.md](docs/context.md)** - Track decisions, sessions, and key learnings (living document)
 - **[README.md](docs/README.md)** - Documentation hub with links to all guides
 - Architecture Decision Records (ADRs)
 - Technical guides and tutorials
 
 Key documentation sections:
+
 - Architecture and design patterns
 - MCP server integration guide
 - Agent development guide
@@ -223,12 +233,14 @@ See [mcp_servers/README.md](mcp_servers/README.md) for details on using and crea
 ## Development Workflow
 
 ### Starting a Work Session
+
 1. Create an Agent Session issue (use template)
 2. Adopt the appropriate agent mode (Architect, Coder, Critic, etc.)
 3. Reference the Fusion Agent prompt
 4. Track progress in the session issue
 
 ### Making Changes
+
 1. Create a feature branch
 2. Make small, incremental changes
 3. Commit with clear messages
@@ -236,6 +248,7 @@ See [mcp_servers/README.md](mcp_servers/README.md) for details on using and crea
 5. Request reviews
 
 ### Code Review
+
 - Use Critic Agent mode for reviews
 - Check for security issues
 - Verify no hardcoded secrets
@@ -244,6 +257,7 @@ See [mcp_servers/README.md](mcp_servers/README.md) for details on using and crea
 ## Contributing & Next Steps
 
 ### Contributing Guidelines
+
 - Follow the [Fusion Agent principles](prompts/fusion_agent.md)
 - Make small, surgical changes
 - Use environment variables for secrets
@@ -252,6 +266,7 @@ See [mcp_servers/README.md](mcp_servers/README.md) for details on using and crea
 - Add tests for new functionality
 
 ### Future Enhancements
+
 - Docker-based VS Code debugging configurations
 - Additional MCP server integrations
 - Enhanced multi-model fusion logic

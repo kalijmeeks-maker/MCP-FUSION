@@ -12,23 +12,27 @@ This directory contains documentation for the MCP-FUSION project.
 ## Documentation Structure
 
 ### Core Documentation
+
 - **context.md** - Living document tracking decisions, sessions, and context
 - **architecture.md** - System architecture and design patterns
 - **getting-started.md** - Onboarding guide for new contributors
 
 ### Technical Documentation
+
 - **mcp-server-guide.md** - MCP server integration guide
 - **agent-development.md** - Agent development guide
 - **api-reference.md** - API documentation
 - **configuration.md** - Configuration options
 
 ### Guides & Tutorials
+
 - **workflow-guide.md** - Common workflows and processes
 - **testing-guide.md** - Testing strategies
 - **deployment-guide.md** - Deployment instructions
 - **troubleshooting.md** - Common issues and solutions
 
 ### Design Documents
+
 - **adr/** - Architecture Decision Records
 - **rfcs/** - Request for Comments
 - **design-docs/** - Detailed design documents
@@ -36,6 +40,7 @@ This directory contains documentation for the MCP-FUSION project.
 ## Contributing to Documentation
 
 ### Style Guide
+
 - Use Markdown format
 - Include code examples where helpful
 - Keep language clear and concise
@@ -43,6 +48,7 @@ This directory contains documentation for the MCP-FUSION project.
 - Link to related documents
 
 ### Documentation Standards
+
 1. **Headers**: Use ## for main sections, ### for subsections
 2. **Code blocks**: Always specify language for syntax highlighting
 3. **Links**: Use relative links for internal documents
@@ -57,6 +63,7 @@ This directory contains documentation for the MCP-FUSION project.
 Brief description of what this document covers.
 
 ## Table of Contents
+
 - [Section 1](#section-1)
 - [Section 2](#section-2)
 
@@ -75,20 +82,25 @@ More details...
 \`\`\`
 
 ## See Also
+
 - [Related Doc](link.md)
 ```
 
 ## Documentation Types
 
 ### Architecture Decision Records (ADRs)
+
 Track important architectural decisions:
+
 - **Status**: Proposed, Accepted, Deprecated, Superseded
 - **Context**: Why the decision was needed
 - **Decision**: What was decided
 - **Consequences**: Impact of the decision
 
 ### RFCs (Request for Comments)
+
 Propose significant changes:
+
 - **Summary**: Brief overview
 - **Motivation**: Why this change
 - **Detailed Design**: How it will work
@@ -96,7 +108,9 @@ Propose significant changes:
 - **Open Questions**: Unresolved issues
 
 ### Design Documents
+
 Detailed technical designs:
+
 - **Overview**: High-level description
 - **Goals**: What we're trying to achieve
 - **Non-Goals**: What's out of scope
@@ -106,13 +120,16 @@ Detailed technical designs:
 ## Maintaining Documentation
 
 ### Regular Updates
+
 - Review documentation quarterly
 - Update after major changes
 - Archive obsolete documents
 - Track version changes
 
 ### Documentation Checklist
+
 When updating code:
+
 - [ ] Update relevant documentation
 - [ ] Add/update code examples
 - [ ] Update API references
@@ -122,11 +139,13 @@ When updating code:
 ## Tools
 
 ### Documentation Generation
+
 - JSDoc for code documentation
 - Markdown for manual docs
 - Diagrams using Mermaid or PlantUML
 
 ### Documentation Testing
+
 - Link checking: `markdown-link-check`
 - Spell checking: `cspell`
 - Linting: `markdownlint`
@@ -150,11 +169,13 @@ When updating code:
 ## Resources
 
 ### External Resources
+
 - [MCP Documentation](https://modelcontextprotocol.io/)
 - [LangGraph Docs](https://langchain-ai.github.io/langgraph/)
 - [n8n Documentation](https://docs.n8n.io/)
 
 ### Related Projects
+
 - [Puppeteer MCP Server](https://github.com/modelcontextprotocol/servers)
 - [GGWave](https://github.com/ggerganov/ggwave)
 
@@ -169,4 +190,4 @@ When updating code:
 
 ---
 
-*For contribution guidelines, see the main [README.md](../README.md).*
+_For contribution guidelines, see the main [README.md](../README.md)._

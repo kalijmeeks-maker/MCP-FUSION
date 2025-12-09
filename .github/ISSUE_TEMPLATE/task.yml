@@ -34,7 +34,7 @@ body:
       placeholder: |
         - Required files: 
         - Dependencies: 
-        - Access needed: 
+        - Access needed:
 
   - type: textarea
     id: outputs
@@ -44,7 +44,7 @@ body:
       placeholder: |
         - Files to create/modify: 
         - Deliverables: 
-        - Documentation: 
+        - Documentation:
 
   - type: textarea
     id: plan

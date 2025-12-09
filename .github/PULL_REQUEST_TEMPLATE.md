@@ -8,9 +8,9 @@
 
 <!-- List the key changes in this PR -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Why
 
@@ -33,9 +33,9 @@
 
 <!-- Describe how to test these changes -->
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Checklist
 
@@ -69,7 +69,7 @@ Related to #
 - [ ] Critic Mode
 - [ ] Scribe Mode
 - [ ] Fusion Mode
-- [ ] Other: 
+- [ ] Other:
 
 ---
 

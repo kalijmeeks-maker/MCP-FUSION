@@ -21,33 +21,43 @@ MCP servers provide standardized interfaces for AI agents to interact with exter
 ## Available MCP Servers
 
 ### Puppeteer Browser
+
 Provides headless browser capabilities for:
+
 - Web scraping
 - Screenshot capture
 - Form automation
 - Navigation tasks
 
 ### Filesystem
+
 Safe file system operations:
+
 - Read/write files
 - Directory traversal
 - File metadata
 
 ### Git/GitHub
+
 Git repository operations:
+
 - Commit and push
 - Branch management
 - PR operations
 - Issue tracking
 
 ### GGWave
+
 Audio-based communication:
+
 - Encode data to ultrasonic audio
 - Decode audio to data
 - Air-gapped device communication
 
 ### Notion
+
 Notion API integration:
+
 - Database queries
 - Page creation
 - Content updates
@@ -55,6 +65,7 @@ Notion API integration:
 ## Adding a New MCP Server
 
 1. **Create directory structure**:
+
    ```bash
    mkdir -p mcp_servers/server_name
    cd mcp_servers/server_name
@@ -75,16 +86,14 @@ Notion API integration:
 ## Server Configuration Format
 
 ### Basic config.json example:
+
 ```json
 {
   "name": "server-name",
   "version": "1.0.0",
   "description": "Server description",
   "transport": "stdio",
-  "capabilities": [
-    "tool-calling",
-    "resource-access"
-  ],
+  "capabilities": ["tool-calling", "resource-access"],
   "env": {
     "API_KEY": "${SERVER_API_KEY}"
   }
@@ -92,6 +101,7 @@ Notion API integration:
 ```
 
 ### Catalog YAML example:
+
 ```yaml
 name: Server Name
 version: 1.0.0

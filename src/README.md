@@ -5,7 +5,9 @@ This directory contains the main source code for the MCP-FUSION system.
 ## Structure
 
 ### `/agents`
+
 Contains agent implementations and logic for the various sub-agents:
+
 - Wealth Agent - Financial analysis and data structuring
 - Ops Agent - Workflow automation and integrations
 - Critic Agent - Code review and quality assessment
@@ -13,14 +15,18 @@ Contains agent implementations and logic for the various sub-agents:
 - Scribe Agent - Documentation and session summaries
 
 ### `/core`
+
 Core orchestration logic and fusion system:
+
 - Model orchestration
 - MCP server integrations
 - Message routing and coordination
 - State management
 
 ### `/utils`
+
 Utility functions and helpers:
+
 - Configuration management
 - Logging and debugging
 - Common helpers
@@ -58,6 +64,7 @@ npm test
 ## Adding New Agents
 
 When adding a new agent:
+
 1. Create a new file in `/agents`
 2. Implement the agent interface
 3. Add to the orchestrator
@@ -67,6 +74,7 @@ When adding a new agent:
 ## MCP Server Integration
 
 To integrate a new MCP server:
+
 1. Define the server configuration in `/mcp_servers`
 2. Add catalog YAML if needed
 3. Create wrapper in `/core`

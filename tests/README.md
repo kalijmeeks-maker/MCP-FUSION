@@ -34,36 +34,39 @@ npm run test:watch
 ## Writing Tests
 
 ### Unit Tests
+
 Test individual functions and modules in isolation:
 
 ```javascript
 // Example: tests/unit/agents/wealth-agent.test.js
-describe('WealthAgent', () => {
-  it('should analyze stock data', () => {
+describe("WealthAgent", () => {
+  it("should analyze stock data", () => {
     // Test implementation
   });
 });
 ```
 
 ### Integration Tests
+
 Test interactions between components:
 
 ```javascript
 // Example: tests/integration/mcp-servers/puppeteer.test.js
-describe('Puppeteer MCP Integration', () => {
-  it('should capture screenshot', async () => {
+describe("Puppeteer MCP Integration", () => {
+  it("should capture screenshot", async () => {
     // Test implementation
   });
 });
 ```
 
 ### End-to-End Tests
+
 Test complete user workflows:
 
 ```javascript
 // Example: tests/e2e/fusion-workflow.test.js
-describe('Multi-Model Fusion Workflow', () => {
-  it('should complete fusion cycle', async () => {
+describe("Multi-Model Fusion Workflow", () => {
+  it("should complete fusion cycle", async () => {
     // Test implementation
   });
 });
@@ -84,8 +87,12 @@ Common test utilities and helpers:
 
 ```javascript
 // tests/utils/mocks.js
-export const mockMCPServer = () => { /* ... */ };
-export const mockAgentResponse = () => { /* ... */ };
+export const mockMCPServer = () => {
+  /* ... */
+};
+export const mockAgentResponse = () => {
+  /* ... */
+};
 ```
 
 ## Fixtures
@@ -102,6 +109,7 @@ Test data should be placed in `/fixtures`:
 ## Continuous Integration
 
 Tests run automatically on:
+
 - Every push to feature branches
 - Pull request creation
 - Before merging to main
@@ -124,17 +132,20 @@ npm run test:debug
 For testing MCP server integrations, use mock servers:
 
 ```javascript
-import { createMockMCPServer } from './utils/mocks';
+import { createMockMCPServer } from "./utils/mocks";
 
 const mockServer = createMockMCPServer({
-  name: 'test-server',
-  tools: [/* mock tools */]
+  name: "test-server",
+  tools: [
+    /* mock tools */
+  ],
 });
 ```
 
 ## Security Testing
 
 Security-related tests should verify:
+
 - No secrets in logs
 - Input validation
 - Permission checks
@@ -146,8 +157,8 @@ Performance benchmarks should be in `/tests/performance`:
 
 ```javascript
 // tests/performance/orchestration-benchmark.js
-describe('Orchestration Performance', () => {
-  it('should handle 100 concurrent requests', async () => {
+describe("Orchestration Performance", () => {
+  it("should handle 100 concurrent requests", async () => {
     // Benchmark implementation
   });
 });

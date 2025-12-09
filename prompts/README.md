@@ -5,7 +5,9 @@ This directory contains prompt templates and instructions for AI agents working 
 ## Files
 
 ### `fusion_agent.md`
+
 The main mega prompt for GitHub Copilot and other AI agents. This defines:
+
 - Agent identity and responsibilities
 - Sub-agent roles (Wealth, Ops, Critic, Judge, Scribe)
 - Working styles and behaviors
@@ -17,10 +19,13 @@ The main mega prompt for GitHub Copilot and other AI agents. This defines:
 ## Prompt Categories
 
 ### System Prompts
+
 Core identity and behavior prompts for the main Fusion Agent.
 
 ### Sub-Agent Prompts
+
 Specialized prompts for each sub-agent role:
+
 - `wealth_agent_prompt.md` - Financial analysis and strategy
 - `ops_agent_prompt.md` - Workflow automation
 - `critic_agent_prompt.md` - Code review and quality
@@ -28,14 +33,18 @@ Specialized prompts for each sub-agent role:
 - `scribe_agent_prompt.md` - Documentation and summaries
 
 ### Task Templates
+
 Reusable prompt templates for common tasks:
+
 - Code refactoring
 - MCP server integration
 - Documentation generation
 - Testing workflows
 
 ### Workflow Prompts
+
 Multi-step workflow instructions:
+
 - Bug fix workflow
 - Feature development workflow
 - PR review workflow
@@ -44,13 +53,16 @@ Multi-step workflow instructions:
 ## Using Prompts
 
 ### For GitHub Copilot
+
 1. Open the prompt file (e.g., `fusion_agent.md`)
 2. Copy the entire content
 3. Paste into GitHub Copilot Chat
 4. Copilot will adopt the agent identity
 
 ### For Other AI Systems
+
 Prompts can be adapted for:
+
 - Claude (Anthropic)
 - ChatGPT (OpenAI)
 - DeepSeek
@@ -58,7 +70,9 @@ Prompts can be adapted for:
 - Perplexity
 
 ### For Custom Agents
+
 Use prompts as base templates and customize:
+
 1. Copy the base prompt
 2. Modify for your specific use case
 3. Add domain-specific context
@@ -67,6 +81,7 @@ Use prompts as base templates and customize:
 ## Prompt Engineering Tips
 
 ### Best Practices
+
 - **Be specific**: Clear, detailed instructions
 - **Provide examples**: Show desired output format
 - **Set constraints**: Define what NOT to do
@@ -74,7 +89,9 @@ Use prompts as base templates and customize:
 - **Iterate**: Refine based on results
 
 ### Prompt Structure
+
 Good prompts typically include:
+
 1. **Identity**: Who the agent is
 2. **Mission**: What the agent should do
 3. **Context**: Background information
@@ -87,16 +104,20 @@ Good prompts typically include:
 When creating a new prompt:
 
 1. **Start with a template**:
+
    ```markdown
    # Agent Name
-   
+
    ## Identity
+
    You are...
-   
+
    ## Mission
+
    Your goal is...
-   
+
    ## Guidelines
+
    - Guideline 1
    - Guideline 2
    ```
@@ -110,6 +131,7 @@ When creating a new prompt:
 ## Prompt Variables
 
 Use placeholders for dynamic content:
+
 - `{PROJECT_NAME}` - Project name
 - `{TASK_DESCRIPTION}` - Task details
 - `{CONTEXT}` - Relevant context
@@ -118,6 +140,7 @@ Use placeholders for dynamic content:
 ## Multi-Model Fusion
 
 For fusion workflows, combine prompts:
+
 1. Send to multiple models
 2. Collect responses
 3. Use Judge agent to merge
@@ -126,6 +149,7 @@ For fusion workflows, combine prompts:
 ## Security Considerations
 
 When writing prompts:
+
 - Never include actual API keys
 - Use placeholder values
 - Remind agents about security
@@ -134,6 +158,7 @@ When writing prompts:
 ## Maintenance
 
 Prompts should be:
+
 - **Reviewed regularly**: Update as the system evolves
 - **Versioned**: Track significant changes
 - **Tested**: Verify effectiveness
@@ -144,6 +169,7 @@ Prompts should be:
 ## Examples
 
 ### Quick Task Prompt
+
 ```markdown
 Task: {TASK_DESCRIPTION}
 Context: {CONTEXT}
@@ -152,8 +178,10 @@ Output format: {FORMAT}
 ```
 
 ### Code Review Prompt
+
 ```markdown
 Review the following code changes:
+
 - Check for security issues
 - Verify best practices
 - Suggest improvements

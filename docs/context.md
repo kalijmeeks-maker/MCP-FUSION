@@ -5,17 +5,20 @@ This document tracks important decisions, sessions, and context for the MCP-FUSI
 ## Architecture Decisions
 
 ### ADR-001: Multi-Model Fusion Architecture
+
 **Date**: 2024
 **Status**: Active
 
 **Decision**: Implement a multi-model fusion system that orchestrates Grok, GPT, DeepSeek, and Perplexity through a unified interface.
 
-**Rationale**: 
+**Rationale**:
+
 - Leverage strengths of different models
 - Enable parallel reasoning and comparison
 - Provide fallback options for reliability
 
 **Consequences**:
+
 - Requires robust orchestration layer
 - Need Judge agent to merge outputs
 - API key management complexity
@@ -23,17 +26,20 @@ This document tracks important decisions, sessions, and context for the MCP-FUSI
 ---
 
 ### ADR-002: MCP Server Integration Strategy
+
 **Date**: 2024
 **Status**: Active
 
 **Decision**: Use Model Context Protocol (MCP) servers for all external integrations (Puppeteer, Git, Filesystem, etc.)
 
 **Rationale**:
+
 - Standardized interface for tool access
 - Separation of concerns
 - Easier testing and mocking
 
 **Consequences**:
+
 - Need to maintain MCP server definitions
 - Learning curve for MCP protocol
 - Dependency on MCP ecosystem
@@ -61,23 +67,27 @@ This document tracks important decisions, sessions, and context for the MCP-FUSI
 ## Project Conventions
 
 ### Commit Messages
+
 - Use clear, descriptive messages
 - Prefix with category: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
 - Keep first line under 72 characters
 
 ### Code Style
+
 - Use environment variables for all secrets
 - Include docstrings for functions and classes
 - Prefer small, focused modules
 - Test-driven when possible
 
 ### Branch Strategy
+
 - `main` - stable production code
 - `develop` - integration branch
 - Feature branches: `feature/description`
 - Fix branches: `fix/description`
 
 ### Security
+
 - Never commit API keys or secrets
 - Use `.env` files (gitignored)
 - Validate all external inputs
@@ -96,4 +106,4 @@ This document tracks important decisions, sessions, and context for the MCP-FUSI
 
 ---
 
-*Last Updated: 2024*
+_Last Updated: 2024_

@@ -79,7 +79,7 @@ body:
       value: |
         - OS: 
         - Node version: 
-        - Docker version: 
+        - Docker version:
 
   - type: textarea
     id: additional

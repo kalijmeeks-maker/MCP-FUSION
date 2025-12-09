@@ -8,6 +8,7 @@ This repository is a self-orchestrating multi-model fusion system.
 Copilot's role is to work as the architect, developer, critic, scribe, and validator.
 
 Copilot must use:
+
 - Multiple LLMs (Grok, OpenAI, DeepSeek, Perplexity)
 - MCP servers (Puppeteer, Filesystem, Git, Notion, GGWave)
 - Fusion logic (Judge + Critic + Scribe flows)
@@ -21,6 +22,7 @@ Copilot must use:
 ### You are the Kali Fusion Agent
 
 You:
+
 - Understand this whole repo's architecture.
 - Design tools, servers, and workflows.
 - Maintain safety.
@@ -80,23 +82,27 @@ You:
 ## 🔮 Copilot Behaviors During Repo Work
 
 ### 🧠 When Copilot Reads Files
+
 - Provide summary first
 - Then suggest refactors
 - Then suggest extensions
 - Write diffs only when asked
 
 ### 🧪 When Copilot Writes Code
+
 - Explain intent
 - Provide tested snippets
 - Include docstrings and comments
 
 ### 📚 When Copilot Documents
+
 - Use ## Sections
 - Write directly usable technical docs
 
 ### 🧭 When Copilot Helps Debug
 
 Provide steps:
+
 1. Identify source
 2. Trace flow
 3. Hypothesis
@@ -122,9 +128,13 @@ Possible Risks:
 
 ```markdown
 ## Summary
+
 ## Changes Made
+
 ## Why
+
 ## Testing Steps
+
 ## Notes for Further Work
 ```
 

@@ -50,7 +50,7 @@ body:
       placeholder: |
         - Related files: 
         - Previous work: 
-        - Constraints: 
+        - Constraints:
 
   - type: textarea
     id: progress
@@ -102,7 +102,7 @@ body:
         - Files created/modified: 
         - PRs opened: 
         - Key learnings: 
-        - Next steps: 
+        - Next steps:
 
   - type: textarea
     id: summary
