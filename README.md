@@ -120,10 +120,152 @@ cd /Users/kalimeeks/MCP-FUSION
 npm run format
 ```
 
+## Repository Structure
+
+The MCP-FUSION project follows a modular architecture:
+
+```
+/src                    - Source code
+  /agents              - Agent implementations (Wealth, Ops, Critic, Judge, Scribe)
+  /core                - Core orchestration and fusion logic
+  /utils               - Utility functions and helpers
+/mcp_servers           - MCP server configurations and catalogs
+  /puppeteer           - Browser automation
+  /filesystem          - File operations
+  /git                 - Git/GitHub integration
+  /ggwave              - Audio-based communication
+  /notion              - Notion API integration
+/docs                  - Documentation and architecture decisions
+  context.md           - Living document for session tracking
+  architecture.md      - System architecture
+/prompts               - AI agent prompts and templates
+  fusion_agent.md      - Main Copilot mega prompt
+/tests                 - Test suites
+  /unit                - Unit tests
+  /integration         - Integration tests
+  /e2e                 - End-to-end tests
+/scripts               - Utility scripts
+/.github               - GitHub templates and workflows
+  /ISSUE_TEMPLATE      - Issue templates (bug, feature, task, session)
+  PULL_REQUEST_TEMPLATE.md - PR template
+```
+
+## AI Agent System
+
+This repository is designed to work with AI agents following the **Fusion Agent** paradigm:
+
+### Main Fusion Agent
+Located at `/prompts/fusion_agent.md`, this is the primary prompt for GitHub Copilot and other AI assistants. It defines:
+- Agent identity and mission
+- Sub-agent roles and capabilities
+- Working styles and safety guidelines
+- Execution modes (Architect, Coder, Critic, Scribe, Fusion)
+
+### Sub-Agents (Conceptual Roles)
+1. **Wealth Agent** - Financial analysis and data structuring
+2. **Ops Agent** - Workflow automation with Notion/Slack/n8n
+3. **Critic Agent** - Code review and quality assessment
+4. **Judge Agent** - Multi-model output merging
+5. **Scribe Agent** - Documentation and session summaries
+
+### Using the Fusion Agent
+```bash
+# View the mega prompt
+cat prompts/fusion_agent.md
+
+# Copy it into GitHub Copilot Chat or your AI assistant
+# The agent will adopt the Fusion Agent identity and behaviors
+```
+
+## GitHub Templates
+
+### Issue Templates
+- **Bug Report** (`.github/ISSUE_TEMPLATE/bug_report.yml`) - Report bugs with structured format
+- **Feature Request** (`.github/ISSUE_TEMPLATE/feature_request.yml`) - Suggest new features
+- **Task** (`.github/ISSUE_TEMPLATE/task.yml`) - Create executable tasks with plans
+- **Agent Session** (`.github/ISSUE_TEMPLATE/session.yml`) - Track AI agent work sessions
+
+### Pull Request Template
+Located at `.github/PULL_REQUEST_TEMPLATE.md`, includes:
+- Summary and changes made
+- Category classification
+- Testing steps and checklist
+- Agent mode tracking
+- Security notes
+
+## Documentation
+
+All documentation lives in `/docs`:
+- **[context.md](docs/context.md)** - Track decisions, sessions, and key learnings (living document)
+- **[README.md](docs/README.md)** - Documentation hub with links to all guides
+- Architecture Decision Records (ADRs)
+- Technical guides and tutorials
+
+Key documentation sections:
+- Architecture and design patterns
+- MCP server integration guide
+- Agent development guide
+- Testing strategies
+- Troubleshooting
+
+## MCP Server Integration
+
+MCP (Model Context Protocol) servers provide standardized interfaces for AI agents. This project uses:
+
+- **Puppeteer** - Headless browser automation
+- **Filesystem** - Safe file operations
+- **Git/GitHub** - Repository management
+- **GGWave** - Ultrasonic audio data transfer
+- **Notion** - Notion API integration
+
+See [mcp_servers/README.md](mcp_servers/README.md) for details on using and creating MCP servers.
+
+## Development Workflow
+
+### Starting a Work Session
+1. Create an Agent Session issue (use template)
+2. Adopt the appropriate agent mode (Architect, Coder, Critic, etc.)
+3. Reference the Fusion Agent prompt
+4. Track progress in the session issue
+
+### Making Changes
+1. Create a feature branch
+2. Make small, incremental changes
+3. Commit with clear messages
+4. Open PR using the template
+5. Request reviews
+
+### Code Review
+- Use Critic Agent mode for reviews
+- Check for security issues
+- Verify no hardcoded secrets
+- Ensure documentation is updated
+
 ## Contributing & Next Steps
 
-- If you want Docker-based VS Code debugging, I can add `docker exec` attach configurations that mirror the local debug configs.
-- We intentionally keep the helper scripts non-destructive and idempotent. If you'd like the Gemini helper to run a specific sync flow or copy assets, tell me the commands and I will wire them.
+### Contributing Guidelines
+- Follow the [Fusion Agent principles](prompts/fusion_agent.md)
+- Make small, surgical changes
+- Use environment variables for secrets
+- Write clear commit messages
+- Update documentation as needed
+- Add tests for new functionality
+
+### Future Enhancements
+- Docker-based VS Code debugging configurations
+- Additional MCP server integrations
+- Enhanced multi-model fusion logic
+- Automated testing workflows
+- CI/CD pipeline improvements
+
+---
+
+## Resources
+
+- [MCP Documentation](https://modelcontextprotocol.io/)
+- [LangGraph](https://langchain-ai.github.io/langgraph/)
+- [n8n Workflows](https://docs.n8n.io/)
+- [GGWave](https://github.com/ggerganov/ggwave)
 
 ---
 

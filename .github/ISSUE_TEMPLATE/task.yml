@@ -1,0 +1,120 @@
+name: 📋 Task
+description: Create a task for execution or breakdown
+title: "[Task]: "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for tasks that need execution or breakdown into subtasks.
+
+  - type: input
+    id: title
+    attributes:
+      label: Task Title
+      description: A clear, concise title for this task
+      placeholder: e.g., "Write MCP catalog YAML for Puppeteer"
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What is the desired outcome of this task?
+      placeholder: Describe the goal...
+    validations:
+      required: true
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      description: What information, files, or resources are needed?
+      placeholder: |
+        - Required files: 
+        - Dependencies: 
+        - Access needed: 
+
+  - type: textarea
+    id: outputs
+    attributes:
+      label: Outputs
+      description: What will be produced by this task?
+      placeholder: |
+        - Files to create/modify: 
+        - Deliverables: 
+        - Documentation: 
+
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan
+      description: Step-by-step plan to complete this task
+      placeholder: |
+        1. Step one
+        2. Step two
+        3. Step three
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Possible Risks
+      description: What could go wrong or needs special attention?
+      placeholder: |
+        - Risk 1: ...
+        - Risk 2: ...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this task?
+      options:
+        - Critical (needs immediate attention)
+        - High (should be done soon)
+        - Medium (normal priority)
+        - Low (nice to have)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of work is this?
+      options:
+        - Repo Action (files, docs, scripts)
+        - MCP Action (server config, catalogs)
+        - Orchestration Logic (agents, workflows)
+        - Testing
+        - Documentation
+        - DevOps
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: Estimated Time
+      description: How long do you think this will take?
+      placeholder: e.g., "2 hours", "1 day", "1 week"
+
+  - type: checkboxes
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Does this task depend on anything?
+      options:
+        - label: Blocks other tasks
+        - label: Blocked by other tasks (list in additional context)
+        - label: Needs review before starting
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Links, references, related issues...
