@@ -5,6 +5,7 @@ from pathlib import Path
 
 from core.fusion_state import FusionState
 from core.pipeline_loader import load_pipeline
+from core.memory_store import append_event
 
 from workers.openai_worker import openai_planner
 from workers.grok_worker import grok_critic
@@ -66,6 +67,8 @@ def run_pipeline(task_name: str):
         "fusion_state": state.to_dict(),
         "outputs": outputs,
     }
+
+    append_event(payload)
 
     print(json.dumps(payload, indent=2))
 
