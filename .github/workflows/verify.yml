@@ -23,11 +23,7 @@ jobs:
           python -m venv .venv
           . .venv/bin/activate
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          else
-            python -m pip install openai
-          fi
+          python -m pip install -r requirements.txt
 
       - name: Run verify script
         run: |
