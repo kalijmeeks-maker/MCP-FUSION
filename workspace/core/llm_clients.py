@@ -1,13 +1,40 @@
 import os
+import sys
 import json
 import asyncio
 from datetime import datetime, timezone
 from openai import AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 # Define the log file path
 LOG_FILE = "workspace/memory/runs.jsonl"
+
+# --- Kill-switch ---
+def _check_kill_switch(provider: str, model: str) -> Optional[Dict[str, Any]]:
+    """
+    If FUSION_KILL=1, return a structured error dict immediately.
+    Otherwise return None (proceed normally).
+    """
+    if os.getenv("FUSION_KILL", "").strip() == "1":
+        return {
+            "provider": provider,
+            "model": model,
+            "completion": "",
+            "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            "error": {"type": "killed", "message": "FUSION_KILL=1 (kill-switch armed)."},
+        }
+    return None
+
+# --- Rate-limit (per-provider semaphores + delay) ---
+_SEMAPHORE_OPENAI = asyncio.Semaphore(int(os.getenv("FUSION_MAX_CONCURRENCY_OPENAI", "5")))
+_SEMAPHORE_GROK = asyncio.Semaphore(int(os.getenv("FUSION_MAX_CONCURRENCY_GROK", "5")))
+_MIN_DELAY_MS = int(os.getenv("FUSION_MIN_DELAY_MS", "0"))
+
+async def _rate_limit_delay() -> None:
+    """Sleep for configured minimum delay between calls."""
+    if _MIN_DELAY_MS > 0:
+        await asyncio.sleep(_MIN_DELAY_MS / 1000.0)
 
 # Ensure the log directory exists
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
@@ -39,40 +66,53 @@ async def get_openai_completion(prompt: str) -> Dict[str, Any]:
     Retries with exponential backoff on failure.
     """
     model_name = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
-    client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
     
-    output_text = ""
-    usage_data = {} # Initialize usage data
+    # Kill-switch check
+    killed = _check_kill_switch("openai", model_name)
+    if killed:
+        await log_llm_call(
+            provider="openai", model=model_name, prompt=prompt,
+            output_text="", success=False, error="FUSION_KILL=1", usage={}
+        )
+        return killed
     
-    response = await client.chat.completions.create(
-        model=model_name,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    output_text = response.choices[0].message.content
-    
-    if response.usage: # Check if usage data is available
-        usage_data = {
-            "prompt_tokens": response.usage.prompt_tokens,
-            "completion_tokens": response.usage.completion_tokens,
-            "total_tokens": response.usage.total_tokens,
-        }
+    async with _SEMAPHORE_OPENAI:
+        client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+        
+        output_text = ""
+        usage_data = {} # Initialize usage data
+        
+        response = await client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        output_text = response.choices[0].message.content
+        
+        if response.usage: # Check if usage data is available
+            usage_data = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
 
-    await log_llm_call(
-        provider="openai",
-        model=model_name,
-        prompt=prompt,
-        output_text=output_text,
-        success=True,
-        error=None,
-        usage=usage_data # Pass usage data to log
-    )
-    
-    return {
-        "model": model_name, 
-        "provider": "openai", # Added provider
-        "completion": output_text, 
-        "usage": usage_data # Added usage
-    }
+        await log_llm_call(
+            provider="openai",
+            model=model_name,
+            prompt=prompt,
+            output_text=output_text,
+            success=True,
+            error=None,
+            usage=usage_data # Pass usage data to log
+        )
+        
+        await _rate_limit_delay()
+        
+        return {
+            "model": model_name, 
+            "provider": "openai", # Added provider
+            "completion": output_text, 
+            "usage": usage_data # Added usage
+        }
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=10), stop=stop_after_attempt(3))
 async def get_grok_completion(prompt: str) -> Dict[str, Any]:
@@ -83,6 +123,15 @@ async def get_grok_completion(prompt: str) -> Dict[str, Any]:
     """
     model_name = os.environ.get("GROK_MODEL", "grok-3-mini")
     api_key = os.environ.get("XAI_API_KEY")
+    
+    # Kill-switch check
+    killed = _check_kill_switch("grok", model_name)
+    if killed:
+        await log_llm_call(
+            provider="grok", model=model_name, prompt=prompt,
+            output_text="", success=False, error="FUSION_KILL=1", usage={}
+        )
+        return killed
     
     if not api_key:
         # Fallback to mock if no API key
@@ -97,44 +146,47 @@ async def get_grok_completion(prompt: str) -> Dict[str, Any]:
         )
         return {"model": "grok-mock-nokey", "provider": "grok", "completion": output_text, "error": "no_api_key"}
     
-    # xAI uses OpenAI-compatible API
-    client = AsyncOpenAI(
-        api_key=api_key,
-        base_url="https://api.x.ai/v1"
-    )
-    
-    output_text = ""
-    usage_data = {}
-    
-    response = await client.chat.completions.create(
-        model=model_name,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    output_text = response.choices[0].message.content
-    
-    if response.usage:
-        usage_data = {
-            "prompt_tokens": response.usage.prompt_tokens,
-            "completion_tokens": response.usage.completion_tokens,
-            "total_tokens": response.usage.total_tokens,
-        }
+    async with _SEMAPHORE_GROK:
+        # xAI uses OpenAI-compatible API
+        client = AsyncOpenAI(
+            api_key=api_key,
+            base_url="https://api.x.ai/v1"
+        )
+        
+        output_text = ""
+        usage_data = {}
+        
+        response = await client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        output_text = response.choices[0].message.content
+        
+        if response.usage:
+            usage_data = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
 
-    await log_llm_call(
-        provider="grok",
-        model=model_name,
-        prompt=prompt,
-        output_text=output_text,
-        success=True,
-        error=None,
-        usage=usage_data
-    )
-    
-    return {
-        "model": model_name,
-        "provider": "grok",
-        "completion": output_text,
-        "usage": usage_data
-    }
+        await log_llm_call(
+            provider="grok",
+            model=model_name,
+            prompt=prompt,
+            output_text=output_text,
+            success=True,
+            error=None,
+            usage=usage_data
+        )
+        
+        await _rate_limit_delay()
+        
+        return {
+            "model": model_name,
+            "provider": "grok",
+            "completion": output_text,
+            "usage": usage_data
+        }
 
 async def get_completions(prompt: str) -> List[Dict[str, Any]]:
     """
