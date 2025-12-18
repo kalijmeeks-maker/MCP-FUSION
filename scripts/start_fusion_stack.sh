@@ -27,6 +27,16 @@ SESSION="mcp-fusion"
 #    Pane 2: sim_driver.py (inside fusion container → /workspace/sim)
 #    Pane 3: llama_loop.py (inside fusion container → /workspace/loop)
 
+# If a previous tmux session exists, kill it so we create a clean layout.
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+    echo "[HOST] Existing tmux session $SESSION found — killing and recreating"
+    tmux kill-session -t "$SESSION" || true
+fi
+
+# Small pause to ensure tmux server settled
+sleep 0.2
+
+# Create the tmux session
 tmux new-session -d -s "$SESSION" \
     "cd '$REPO_PATH' && docker exec -it mcp-fusion-redis-1 redis-cli MONITOR"
 
