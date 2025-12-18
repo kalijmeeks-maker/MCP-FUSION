@@ -74,25 +74,67 @@ async def get_openai_completion(prompt: str) -> Dict[str, Any]:
         "usage": usage_data # Added usage
     }
 
-# TODO: Replace this mock with a real implementation for the Grok/XAI backend.
+@retry(wait=wait_exponential(multiplier=1, min=1, max=10), stop=stop_after_attempt(3))
 async def get_grok_completion(prompt: str) -> Dict[str, Any]:
     """
-    (MOCKED) Fetches a completion from Grok's API.
+    Fetches a completion from xAI's Grok API.
+    Uses OpenAI-compatible interface with xAI base URL.
+    Retries with exponential backoff on failure.
     """
-    model_name = "grok-mock"
-    output_text = f"Grok mock response for: {prompt}"
-    await asyncio.sleep(0.5) # Simulate network latency
+    model_name = os.environ.get("GROK_MODEL", "grok-3-mini")
+    api_key = os.environ.get("XAI_API_KEY")
     
+    if not api_key:
+        # Fallback to mock if no API key
+        output_text = f"Grok mock response (no XAI_API_KEY): {prompt}"
+        await log_llm_call(
+            provider="grok",
+            model="grok-mock-nokey",
+            prompt=prompt,
+            output_text=output_text,
+            success=True,
+            error="XAI_API_KEY not set, using mock"
+        )
+        return {"model": "grok-mock-nokey", "provider": "grok", "completion": output_text, "error": "no_api_key"}
+    
+    # xAI uses OpenAI-compatible API
+    client = AsyncOpenAI(
+        api_key=api_key,
+        base_url="https://api.x.ai/v1"
+    )
+    
+    output_text = ""
+    usage_data = {}
+    
+    response = await client.chat.completions.create(
+        model=model_name,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    output_text = response.choices[0].message.content
+    
+    if response.usage:
+        usage_data = {
+            "prompt_tokens": response.usage.prompt_tokens,
+            "completion_tokens": response.usage.completion_tokens,
+            "total_tokens": response.usage.total_tokens,
+        }
+
     await log_llm_call(
         provider="grok",
         model=model_name,
         prompt=prompt,
         output_text=output_text,
         success=True,
-        error=None
+        error=None,
+        usage=usage_data
     )
     
-    return {"model": model_name, "completion": output_text, "error": None}
+    return {
+        "model": model_name,
+        "provider": "grok",
+        "completion": output_text,
+        "usage": usage_data
+    }
 
 async def get_completions(prompt: str) -> List[Dict[str, Any]]:
     """
@@ -135,20 +177,23 @@ async def get_completions(prompt: str) -> List[Dict[str, Any]]:
         result_grok = await tasks["grok"]
         results.append(result_grok)
     except Exception as e:
-        # This part is for completeness, but the mock shouldn't fail
-        error_message = f"Grok mock failed: {e}"
+        grok_model_name = os.environ.get("GROK_MODEL", "grok-3-mini")
+        error_message = f"Grok failed after retries: {e}"
         await log_llm_call(
             provider="grok",
-            model="grok-mock",
+            model=grok_model_name,
             prompt=prompt,
             output_text="",
             success=False,
-            error=error_message
+            error=error_message,
+            usage={}
         )
         results.append({
-            "model": "grok-mock",
+            "model": grok_model_name,
+            "provider": "grok",
             "completion": "",
-            "error": error_message
+            "error": error_message,
+            "usage": {}
         })
 
     return results
