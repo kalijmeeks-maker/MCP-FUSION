@@ -59,5 +59,17 @@ check("openai")
 print("\nIf openai is missing, install into THIS runtime:\n  " + __import__("sys").executable + " -m pip install openai\n")
 PYEOF
 
+echo "
+=== pip check ==="
+"$PY" -m pip check || { echo "FAIL: pip check"; exit 1; }
+echo
+
+echo "
+=== openai version ==="
+"$PY" - << 'PYEOF2'
+import openai
+print(getattr(openai, "__version__", "unknown"))
+PYEOF2
+
 echo
 echo "=== Verify complete: PASS ==="
