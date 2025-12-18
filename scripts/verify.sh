@@ -55,6 +55,8 @@ check("pathlib")
 # LLM SDKs (expected for live workers). If you're still bootstrapping,
 # install into the runtime interpreter shown above.
 check("openai")
+
+print("\nIf openai is missing, install into THIS runtime:\n  " + __import__("sys").executable + " -m pip install openai\n")
 PYEOF
 
 echo
