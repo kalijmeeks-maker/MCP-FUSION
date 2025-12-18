@@ -114,6 +114,20 @@
       },
       "cwd": "${workspaceFolder}/workspace",
       "preLaunchTask": "venv-check"
+    },
+    {
+      "name": "Python: MCP-FUSION - Debug Publisher",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/workspace/tools/debug_publisher.py",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/workspace/.env",
+      "python": "${workspaceFolder}/workspace/.venv/bin/python",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/workspace"
+      },
+      "cwd": "${workspaceFolder}/workspace",
+      "preLaunchTask": "venv-check"
     }
   ],
   "compounds": [
@@ -128,6 +142,17 @@
         "Python: MCP-FUSION - Orchestrator"
       ],
       "stopAll": true
+    },
+    {
+      "name": "MCP-FUSION: Debug Pipeline (ChatGPT -> Judge)",
+      "configurations": [
+        "Python: MCP-FUSION - Router",
+        "Python: MCP-FUSION - ChatGPT Worker",
+        "Python: MCP-FUSION - Judge Worker",
+        "Python: MCP-FUSION - Debug Publisher"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "venv-check"
     }
   ]
 }

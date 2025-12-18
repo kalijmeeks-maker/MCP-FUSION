@@ -1,0 +1,9 @@
+{
+  "researcher": ["grok", "perplexity"],
+  "explainer": ["chatgpt"],
+  "planner": ["chatgpt"],
+  "fact_checker": ["perplexity", "grok"],
+  "critic": ["chatgpt", "grok"],
+  "synthesizer": ["chatgpt"],
+  "judge": ["judge"]
+}

@@ -1,0 +1,8 @@
+openai
+redis
+pydantic
+tenacity
+pyyaml
+requests
+numpy
+reportlab

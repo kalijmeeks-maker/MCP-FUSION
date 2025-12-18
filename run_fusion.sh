@@ -127,10 +127,39 @@ stop_services() {
     echo "[LAUNCH] Stop signal sent."
 }
 
+# --------------------------
+# Run Healthcheck
+# --------------------------
+run_healthcheck() {
+    echo "[LAUNCH] Running healthcheck..."
+    # Ensure psutil is installed
+    if ! python3 -c "import psutil" 2>/dev/null; then
+        echo "[WARN] 'psutil' not found. Installing..."
+        pip install psutil
+    fi
+    python3 "$BASE_DIR/tools/healthcheck.py"
+}
+
+# --------------------------
+# Submit a Job
+# --------------------------
+run_submit_job() {
+    local prompt="$1"
+    if [ -z "$prompt" ]; then
+        echo "[ERROR] Job submission requires a prompt."
+        echo "Usage: $0 submit \"Your job prompt here\""
+        exit 1
+    fi
+    echo "[LAUNCH] Submitting single job with prompt: '$prompt'"
+    python3 "$BASE_DIR/tools/submit_job.py" "$prompt"
+}
+
+
 # --------------------
 # Command-line modes
 # --------------------
 COMMAND="${1:-start}"
+PROMPT="${2:-}"
 
 case "$COMMAND" in
     start)
@@ -148,8 +177,16 @@ case "$COMMAND" in
     stop)
         stop_services
         ;;
+    health)
+        load_env
+        run_healthcheck
+        ;;
+    submit)
+        load_env
+        run_submit_job "$PROMPT"
+        ;;
     *)
-        echo "Usage: $0 [start|reload|stop]"
+        echo "Usage: $0 [start|reload|stop|health|submit \"prompt\"]"
         exit 1
         ;;
 esac

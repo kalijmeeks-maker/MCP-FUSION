@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# MCP-FUSION pre-commit hook
+# Prevents common failures: secret leaks, wrong Python paths, missing docs
+# 
+# Install: cp .github/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Or: git config core.hooksPath .github/hooks
+
+set -u
+
+FAIL=0
+
+echo "🔍 Running MCP-FUSION architecture checks..."
+
+# 1. Check for secret-like patterns
+echo ""
+echo "1️⃣  Checking for secret-like patterns in staged changes..."
+if git diff --cached | grep -nE '(sk-[A-Za-z0-9]{20,}|xai-[A-Za-z0-9]{20,}|bearer [A-Za-z0-9]{20,}|BEGIN PRIVATE|-----BEGIN)'; then
+    echo "❌ ERROR: Possible secret detected. Use 'your_key_here' or 'REDACTED' instead."
+    FAIL=1
+else
+    echo "✅ No obvious secrets."
+fi
+
+# 2. Check copilot-instructions.md exists if .github/ is being modified
+echo ""
+echo "2️⃣  Checking architecture directives..."
+if [ -f ".github/copilot-instructions.md" ]; then
+    if grep -q "\.venv/bin/python" ".github/copilot-instructions.md"; then
+        echo "✅ Copilot instructions are current."
+    else
+        echo "⚠️  WARNING: .venv/bin/python not mentioned in copilot-instructions.md"
+    fi
+else
+    echo "⚠️  WARNING: .github/copilot-instructions.md not found (should exist)"
+fi
+
+# 3. Check ARCHITECTURE.md mentions layer separation
+echo ""
+echo "3️⃣  Checking ARCHITECTURE.md..."
+if [ -f "ARCHITECTURE.md" ]; then
+    if grep -q "Control Plane\|Execution Plane" "ARCHITECTURE.md"; then
+        echo "✅ Architecture documentation is in place."
+    else
+        echo "⚠️  WARNING: ARCHITECTURE.md missing layer definitions"
+    fi
+else
+    echo "⚠️  WARNING: ARCHITECTURE.md not found (should exist)"
+fi
+
+# 4. Check shell scripts for ambiguous Python refs
+echo ""
+echo "4️⃣  Checking shell scripts for bare python references..."
+SCRIPTS="scripts/*.sh run_fusion.sh run_debug_pipeline.sh"
+SCRIPT_FAIL=0
+for script in $SCRIPTS; do
+    if [ -f "$script" ]; then
+        if grep -nE '^\s*(python|python3)\s' "$script" 2>/dev/null | grep -v '#' > /dev/null; then
+            echo "⚠️  $script has bare 'python' or 'python3' (not full path)"
+            SCRIPT_FAIL=1
+        fi
+    fi
+done
+if [ $SCRIPT_FAIL -eq 0 ]; then
+    echo "✅ No bare Python references in shell scripts."
+fi
+
+# 5. Final summary
+echo ""
+if [ $FAIL -eq 1 ]; then
+    echo "❌ PRE-COMMIT CHECK FAILED"
+    echo "Fix the errors above and try again."
+    exit 1
+else
+    echo "✅ All architecture checks passed!"
+    echo "Proceeding with commit."
+    exit 0
+fi

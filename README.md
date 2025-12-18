@@ -2,6 +2,8 @@
 
 MCP-FUSION is a Model Context Protocol (MCP) "fusion layer" that orchestrates multiple AI agent workers and coordinates them via a Redis broker. This repository is wired for a debugger-first, one-button local development experience.
 
+> 📘 **Architecture & Debugging**: See [ARCHITECTURE.md](ARCHITECTURE.md) for system layer separation, runtime dependencies, and troubleshooting. **AI Assistants**: See [.github/copilot-instructions.md](.github/copilot-instructions.md) for critical directives.
+
 ## One-Button Full Stack (Local)
 
 From the project root (`/Users/kalimeeks/MCP-FUSION`) you can start the full local stack using the macOS-friendly wrapper or the script directly.
