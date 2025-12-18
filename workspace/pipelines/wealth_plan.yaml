@@ -1,0 +1,25 @@
+pipeline:
+  name: wealth_plan
+  version: 1.0
+
+  description: >
+    Strategic wealth planning pipeline using planner, critic,
+    and coordinator decision authority.
+
+  agents:
+    - id: planner
+      type: openai_planner
+      role: generate_action_plan
+
+    - id: critic
+      type: grok_critic
+      role: identify_risks_and_safeguards
+
+    - id: coordinator
+      type: coordinator
+      role: final_decision_authority
+
+  flow:
+    - planner
+    - critic
+    - coordinator

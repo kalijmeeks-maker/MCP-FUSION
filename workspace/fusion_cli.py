@@ -4,51 +4,73 @@ import json
 from pathlib import Path
 
 from core.fusion_state import FusionState
+from core.pipeline_loader import load_pipeline
+
 from workers.openai_worker import openai_planner
 from workers.grok_worker import grok_critic
-from workers.aggregator import aggregate_responses
+from workers.coordinator_worker import coordinator
+
+
+AGENT_MAP = {
+    "openai_planner": openai_planner,
+    "grok_critic": grok_critic,
+    "coordinator": coordinator,
+}
 
 
 def print_status(mode: str, raw_args):
-    openai_ok = bool(os.getenv("OPENAI_API_KEY"))
-    xai_ok = bool(os.getenv("XAI_API_KEY"))
-
     status = {
         "mode": mode,
         "cwd": str(Path.cwd()),
         "env_status": {
-            "OPENAI_API_KEY_present": openai_ok,
-            "XAI_API_KEY_present": xai_ok,
+            "OPENAI_API_KEY_present": bool(os.getenv("OPENAI_API_KEY")),
+            "XAI_API_KEY_present": bool(os.getenv("XAI_API_KEY")),
         },
         "args": raw_args,
     }
-
     print(json.dumps(status, indent=2))
 
 
-def run_fusion_task(task_name: str, raw_args):
-    goal_text = f"Execute fusion task: {task_name}"
-    state = FusionState.new(goal=goal_text, user_id="kali", agent_role="coordinator")
+def run_pipeline(task_name: str):
+    pipeline = load_pipeline(task_name)
 
-    # Mock multi-agent calls
-    planner_out = openai_planner(state)
-    critic_out = grok_critic(state)
+    state = FusionState.new(
+        goal=f"Execute pipeline: {task_name}",
+        user_id="kali",
+        agent_role="coordinator",
+    )
 
-    # Merge them
-    fused = aggregate_responses([planner_out, critic_out])
+    outputs = {}
+    last_planner = None
+    last_critic = None
+
+    for agent in pipeline["pipeline"]["agents"]:
+        agent_type = agent["type"]
+        agent_id = agent["id"]
+
+        if agent_type == "coordinator":
+            result = AGENT_MAP[agent_type](task_name, last_planner, last_critic)
+        else:
+            result = AGENT_MAP[agent_type](state)
+
+        outputs[agent_id] = result
+
+        if agent_type == "openai_planner":
+            last_planner = result
+        elif agent_type == "grok_critic":
+            last_critic = result
 
     payload = {
         "job_id": state.job_id,
-        "task": task_name,
-        "goal": goal_text,
+        "pipeline": pipeline["pipeline"]["name"],
         "fusion_state": state.to_dict(),
-        "fusion_output": fused,
+        "outputs": outputs,
     }
 
     print(json.dumps(payload, indent=2))
 
 
-def main() -> None:
+def main():
     raw_args = sys.argv[1:]
     mode = raw_args[0] if raw_args else "NO_MODE"
 
@@ -56,8 +78,9 @@ def main() -> None:
         print("Fusion CLI starting...")
         print_status(mode, raw_args)
     elif mode.startswith("FUSION_TASK:"):
-        print("Fusion CLI starting (task mode)...")
-        run_fusion_task(mode, raw_args[1:])
+        task_name = mode.split(":", 1)[1]
+        print("Fusion CLI starting (pipeline mode)...")
+        run_pipeline(task_name)
     else:
         print("Fusion CLI starting (unknown mode)...")
         print_status(mode, raw_args)
