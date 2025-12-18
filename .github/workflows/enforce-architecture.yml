@@ -1,0 +1,117 @@
+name: Enforce Architecture Rules
+
+on:
+  pull_request:
+    branches: [main, develop, experiments/*]
+  push:
+    branches: [main, develop]
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    name: No Secret-Like Patterns
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject secret-like patterns
+        run: |
+          # Fail if any commit has secret-like patterns
+          # (long sk-/xai- strings, bearer tokens, etc)
+          EXIT=0
+          git diff origin/main..HEAD --unified=0 | grep -nE '^\+.*(sk-[A-Za-z0-9]{20,}|xai-[A-Za-z0-9]{20,}|bearer [A-Za-z0-9]{20,}|BEGIN PRIVATE|-----BEGIN)' && EXIT=1 || true
+          if [ $EXIT -eq 1 ]; then
+            echo "❌ ERROR: Possible secret detected in diff"
+            echo "Use 'your_key_here' or 'REDACTED' as placeholders instead."
+            exit 1
+          fi
+          echo "✅ No obvious secrets found."
+
+  check-runtime-python:
+    runs-on: ubuntu-latest
+    name: Runtime Python Path Is Explicit
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for ambiguous Python references
+        run: |
+          # Warn if scripts reference python3 without explicit path
+          # (except in docs, exceptions, and comments)
+          echo "Checking for ambiguous Python paths in shell scripts..."
+          
+          # Files to check
+          SCRIPTS="scripts/*.sh run_fusion.sh run_debug_pipeline.sh"
+          
+          for script in $SCRIPTS; do
+            if [ -f "$script" ]; then
+              # Look for bare "python3" or "python" in executable lines
+              # (not in comments or strings)
+              if grep -nE '^\s*(python|python3|python3\.1[0-9])\s' "$script" 2>/dev/null | grep -v '#' | grep -v 'echo'; then
+                echo "⚠️  WARNING: $script has bare python call (not full path)"
+                echo "   Consider using absolute path or \$PYTHON_BIN"
+              fi
+            fi
+          done
+          echo "✅ Runtime path check complete."
+
+  check-venv-reference:
+    runs-on: ubuntu-latest
+    name: Docs Mention .venv/bin/python
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify .github/copilot-instructions.md exists and is current
+        run: |
+          if [ ! -f ".github/copilot-instructions.md" ]; then
+            echo "❌ ERROR: .github/copilot-instructions.md not found"
+            exit 1
+          fi
+          
+          if ! grep -q "\.venv/bin/python" ".github/copilot-instructions.md"; then
+            echo "❌ ERROR: copilot-instructions.md does not mention .venv/bin/python"
+            exit 1
+          fi
+          
+          echo "✅ Architecture directives are in place."
+
+      - name: Verify ARCHITECTURE.md exists
+        run: |
+          if [ ! -f "ARCHITECTURE.md" ]; then
+            echo "❌ ERROR: ARCHITECTURE.md not found"
+            exit 1
+          fi
+          
+          if ! grep -q "Control Plane\|Execution Plane" "ARCHITECTURE.md"; then
+            echo "❌ ERROR: ARCHITECTURE.md missing layer definitions"
+            exit 1
+          fi
+          
+          echo "✅ Architecture documentation is in place."
+
+  lint-docs:
+    runs-on: ubuntu-latest
+    name: Documentation Lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check markdown formatting
+        run: |
+          # Basic sanity checks on docs
+          echo "Checking .github/copilot-instructions.md..."
+          wc -l .github/copilot-instructions.md
+          
+          echo "Checking ARCHITECTURE.md..."
+          wc -l ARCHITECTURE.md
+          
+          echo "✅ Documentation files exist and have content."
+
+      - name: No TODO comments in copilot-instructions.md
+        run: |
+          if grep -i "TODO\|FIXME\|XXX" ".github/copilot-instructions.md" 2>/dev/null; then
+            echo "⚠️  WARNING: Found unresolved TODOs in copilot instructions"
+          else
+            echo "✅ No unresolved TODOs."
+          fi

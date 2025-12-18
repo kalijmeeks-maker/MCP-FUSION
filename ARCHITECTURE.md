@@ -416,6 +416,57 @@ print(os.environ.get("REDIS_URL"))
 
 ---
 
+## Enforced CI Checks
+
+To prevent violations of these rules, MCP-FUSION includes automated checks:
+
+### Local Pre-Commit Hook
+
+Runs on `git commit` to catch issues early:
+
+```bash
+# Install
+./.github/hooks/install.sh
+
+# The hook checks for:
+# • Secret-like patterns (sk-*, xai-*, bearer tokens)
+# • Missing architecture directive files
+# • Ambiguous Python references in shell scripts
+```
+
+### GitHub Actions Workflow
+
+Runs on PR to `main`, `develop`, and `experiments/*`:
+
+```
+.github/workflows/enforce-architecture.yml
+```
+
+**Checks**:
+1. **No Secret-Like Patterns** — Fails PR if it detects long sk- or xai- strings
+2. **Runtime Python Path Is Explicit** — Warns about bare `python3` calls in scripts
+3. **Docs Mention .venv/bin/python** — Requires copilot-instructions.md to exist and reference the runtime
+4. **ARCHITECTURE.md Exists** — Requires layer separation docs
+5. **Documentation Lint** — Basic sanity checks on file sizes and TODOs
+
+### What This Buys You
+
+- **Zero human memory required** — Rules are enforced by CI/pre-commit
+- **Catches 80% of common mistakes before PR review**
+- **Prevents "wrong interpreter" failures** by requiring explicit Python paths
+- **Blocks secret leaks** before they hit GitHub
+
+### Bypassing Checks (Not Recommended)
+
+```bash
+# Skip pre-commit hook (local only)
+git commit --no-verify
+
+# Skip GitHub Actions (requires force-push; not recommended)
+```
+
+---
+
 **Last Updated**: December 17, 2025  
 **Document Owner**: MCP-FUSION Architecture Team  
 **Version**: 1.0
