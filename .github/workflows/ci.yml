@@ -16,11 +16,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps (best effort)
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f workspace/requirements.txt ]; then pip install -r workspace/requirements.txt; fi
-          pip install openai || true
+          pip install -r requirements.txt
 
       - name: Python syntax check
         run: |
