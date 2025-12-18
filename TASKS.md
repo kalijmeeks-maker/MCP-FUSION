@@ -19,6 +19,15 @@ Standardize runtime Python and verification flow so "wrong interpreter" failures
     - `./scripts/verify.sh` fails in CI if the runtime rules are violated
     - Runtime discovery uses `sys.executable` (never launcher shebang)
   - Notes:
+- [ ] TASK-002: Implement MCP server wiring
+  - Goal:
+    - Replace mock outputs in coordinator_worker.py with real multi-LLM pipeline calls.
+    - Use tenacity for retries in llm_clients.py.
+    - Create replay_diff.py for debugging.
+  - Acceptance tests:
+    - coordinator_worker.py successfully calls llm_clients.py.
+    - llm_clients.py returns completions from multiple LLMs.
+    - replay_diff.py can compare two jsonl files.
 
 ## Decisions Log
 - 2025-12-17: Repo is the shared memory layer (no manual relay). Runtime Python must be verified via `sys.executable`.
