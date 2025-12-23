@@ -2,6 +2,16 @@
 
 MCP-FUSION is a Model Context Protocol (MCP) "fusion layer" that orchestrates multiple AI agent workers and coordinates them via a Redis broker. This repository is wired for a debugger-first, one-button local development experience.
 
+## 🚀 Quick Start: Interactive REPL
+
+Launch the interactive command-line interface:
+
+```bash
+./scripts/start_fusion_repl.sh
+```
+
+This starts the Fusion REPL where you can submit tasks and get real-time responses from the orchestration system. See **[REPL_GUIDE.md](docs/REPL_GUIDE.md)** for complete documentation.
+
 ## One-Button Full Stack (Local)
 
 From the project root (`/Users/kalimeeks/MCP-FUSION`) you can start the full local stack using the macOS-friendly wrapper or the script directly.

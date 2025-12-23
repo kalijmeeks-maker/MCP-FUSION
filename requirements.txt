@@ -1,0 +1,29 @@
+# MCP-FUSION Python Dependencies
+
+# Redis client for task queues
+redis>=5.0.0
+
+# Additional dependencies for future enhancements
+# (uncomment as needed)
+
+# For API integrations
+# requests>=2.31.0
+# httpx>=0.25.0
+
+# For async operations
+# asyncio>=3.4.3
+# aioredis>=2.0.1
+
+# For JSON schema validation
+# jsonschema>=4.19.0
+
+# For logging enhancements
+# structlog>=23.1.0
+
+# For environment management
+# python-dotenv>=1.0.0
+
+# For testing
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# pytest-redis>=3.0.0
