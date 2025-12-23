@@ -1,0 +1,2 @@
+# MCP Browser Automation Server Dependencies
+playwright==1.57.0

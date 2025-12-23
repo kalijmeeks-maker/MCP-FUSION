@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation
+README.md
+*.md
+
+# Version control
+.git/
+.gitignore
+
+# Testing
+tests/
+*.test.py
+
+# Catalog (not needed in container)
+mcp-catalog.yaml
