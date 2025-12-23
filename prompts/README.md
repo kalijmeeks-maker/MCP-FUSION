@@ -2,19 +2,39 @@
 
 This directory contains prompt templates and instructions for AI agents working with the MCP-FUSION system.
 
+## 🎯 Quick Start
+
+**Want to use MCP-FUSION in a chat?** 👉 See **[CHAT_GUIDE.md](CHAT_GUIDE.md)** for step-by-step instructions.
+
 ## Files
+
+### `fusion_agent_chat.md` ⭐ NEW
+
+**Chat-optimized version** of the Fusion Agent prompt, ready to copy-paste into:
+
+- GitHub Copilot Chat
+- ChatGPT
+- Claude
+- Any AI chat interface
+
+This is formatted for conversational interaction with clear mode switching, example commands, and quick reference. **Start here if you want to chat with the Fusion Agent!**
 
 ### `fusion_agent.md`
 
-The main mega prompt for GitHub Copilot and other AI agents. This defines:
+The complete mega prompt for GitHub Copilot and other AI agents. This defines:
 
 - Agent identity and responsibilities
 - Sub-agent roles (Wealth, Ops, Critic, Judge, Scribe)
 - Working styles and behaviors
 - Safety guidelines
 - Execution modes
+- Detailed format templates
 
-**Usage**: Paste this into GitHub Copilot's prompt box or reference it when starting an agent session.
+**Usage**: Use this for comprehensive reference or when you need all the detailed templates and examples.
+
+### `CHAT_GUIDE.md`
+
+Step-by-step guide for using the chat prompt with examples, tips, and troubleshooting.
 
 ## Prompt Categories
 

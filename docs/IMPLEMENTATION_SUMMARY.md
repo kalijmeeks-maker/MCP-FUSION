@@ -232,24 +232,20 @@ cat prompts/fusion_agent.md
 ### Suggested Future Work
 
 1. **Populate Agent Implementations**
-
    - Implement agents in `/src/agents`
    - Wire to orchestration layer
 
 2. **Add MCP Server Configurations**
-
    - Puppeteer server config
    - GGWave integration
    - Notion API setup
 
 3. **Create Test Infrastructure**
-
    - Add testing framework
    - Write unit tests
    - Add integration tests
 
 4. **Expand Documentation**
-
    - Architecture diagrams
    - API reference
    - Tutorial guides
