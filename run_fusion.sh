@@ -1,192 +1,265 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# Get the repo root by finding where this script lives
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$SCRIPT_DIR"
-BASE_DIR="$REPO_ROOT/workspace"
+WORKSPACE="$REPO_ROOT/workspace"
+VENV="$WORKSPACE/.venv"
+PY="$VENV/bin/python"
+ENV_FILE="$WORKSPACE/.env"
+ENV_EXAMPLE="$WORKSPACE/.env.example"
+PID_DIR="$WORKSPACE/.run"
+LOG_DIR="$WORKSPACE/logs"
+mkdir -p "$PID_DIR" "$LOG_DIR"
+MODE="${FUSION_MODE:-demo}"
 
-echo "[LAUNCH] MCP-FUSION repo root: $REPO_ROOT"
-echo "[LAUNCH] MCP-FUSION workspace: $BASE_DIR"
-cd "$BASE_DIR"
+SERVICES=(
+  "broker/router.py"
+  "agents/chatgpt/worker.py"
+  "agents/grok/worker.py"
+  "agents/judge/worker.py"
+  "sim/grok_results_listener.py"
+)
 
-# --------------------
-# Activate virtualenv
-# --------------------
-if [ -f ".venv/bin/activate" ]; then
-    echo "[LAUNCH] Activating virtualenv .venv"
-    source ".venv/bin/activate"
-else
-    echo "[ERROR] .venv not found at $BASE_DIR/.venv"
-    echo "[INFO] Create it with: python3 -m venv $BASE_DIR/.venv && $BASE_DIR/.venv/bin/pip install -r requirements.txt"
+print_header() {
+  echo "== MCP-FUSION =="
+}
+
+enter_workspace() {
+  cd "$WORKSPACE"
+}
+
+ensure_env_file() {
+  if [[ ! -f "$ENV_FILE" ]]; then
+    echo "[ERROR] Missing $ENV_FILE"
+    if [[ -f "$ENV_EXAMPLE" ]]; then
+      echo "[HINT] Copy the template: cp \"$ENV_EXAMPLE\" \"$ENV_FILE\" and fill in your keys."
+    fi
     exit 1
-fi
+  fi
+}
 
-# --------------------
-# Load .env if present
-# --------------------
+ensure_venv() {
+  if [[ ! -x "$PY" ]]; then
+    echo "[BOOTSTRAP] Creating venv at $VENV"
+    python3 -m venv "$VENV"
+  fi
+  echo "[BOOTSTRAP] Installing python deps"
+  "$PY" -m pip install -q --upgrade pip
+  "$PY" -m pip install -q -r "$REPO_ROOT/requirements.txt"
+}
+
 load_env() {
-    local env_loader="$REPO_ROOT/scripts/load_env.sh"
-    if [ -f "$env_loader" ]; then
-        source "$env_loader"
-    else
-        echo "[ERROR] Env loader script not found at $env_loader"
-        exit 1
-    fi
+  ensure_env_file
+  # shellcheck source=/dev/null
+  source "$REPO_ROOT/scripts/load_env.sh"
 }
 
-# --------------------
-# Validate keys (structure only)
-# --------------------
 validate_keys() {
-    local ok=1
+  if [[ "${FUSION_OFFLINE:-0}" == "1" ]]; then
+    echo "[LAUNCH] Offline mode enabled; skipping API key validation."
+    return
+  fi
+  local ok=1
+  if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+    echo "[ERROR] OPENAI_API_KEY is not set."
+    ok=0
+  elif [[ "$OPENAI_API_KEY" == "YOUR_REAL_OPENAI_KEY_HERE" ]]; then
+    echo "[ERROR] OPENAI_API_KEY still has placeholder value."
+    ok=0
+  fi
 
-    if [ -z "$OPENAI_API_KEY" ]; then
-        echo "[ERROR] OPENAI_API_KEY is not set. Add it to $BASE_DIR/.env"
-        ok=0
-    elif [[ "$OPENAI_API_KEY" == "YOUR_REAL_OPENAI_KEY_HERE" ]]; then
-        echo "[ERROR] OPENAI_API_KEY still has placeholder value in .env"
-        ok=0
-    elif [[ ! "$OPENAI_API_KEY" == sk-* ]]; then
-        echo "[WARN] OPENAI_API_KEY does not start with 'sk-'. Double-check it's correct."
-    fi
+  if [[ -z "${XAI_API_KEY:-}" ]]; then
+    echo "[ERROR] XAI_API_KEY is not set."
+    ok=0
+  elif [[ "$XAI_API_KEY" == "YOUR_REAL_XAI_KEY_HERE" ]]; then
+    echo "[ERROR] XAI_API_KEY still has placeholder value."
+    ok=0
+  fi
 
-    if [ -z "$XAI_API_KEY" ]; then
-        echo "[ERROR] XAI_API_KEY is not set. Add it to $BASE_DIR/.env"
-        ok=0
-    elif [[ "$XAI_API_KEY" == "YOUR_REAL_XAI_KEY_HERE" ]]; then
-        echo "[ERROR] XAI_API_KEY still has placeholder value in .env"
-        ok=0
-    elif [[ ! "$XAI_API_KEY" == xai-* ]]; then
-        echo "[WARN] XAI_API_KEY does not start with 'xai-'. Double-check it's correct."
-    fi
-
-    # PERPLEXITY optional for now; warn if placeholder
-    if [[ "$PERPLEXITY_API_KEY" == "YOUR_REAL_PERPLEXITY_KEY_HERE" ]]; then
-        echo "[WARN] PERPLEXITY_API_KEY still has placeholder value in .env (optional right now)."
-    fi
-
-    if [ $ok -eq 0 ]; then
-        echo "[LAUNCH] Key validation failed. Fix .env and re-run."
-        exit 1
-    fi
+  if [[ $ok -eq 0 ]]; then
+    echo "[LAUNCH] Key validation failed."
+    exit 1
+  fi
 }
 
-# --------------------
-# Start services
-# --------------------
-start_services() {
-    export PYTHONPATH="$BASE_DIR:$PYTHONPATH"
-    echo "[LAUNCH] PYTHONPATH=$PYTHONPATH"
-    echo "[LAUNCH] Starting services..."
+ensure_redis() {
+  if "$PY" - <<'PY' >/dev/null 2>&1
+import redis
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+r.ping()
+PY
+  then
+    echo "[REDIS] Redis reachable on localhost:6379"
+    return
+  fi
 
-    python3 broker/router.py &
-    BROKER_PID=$!
-    echo "[LAUNCH] broker/router.py (PID: $BROKER_PID)"
+  if command -v docker >/dev/null 2>&1; then
+    echo "[REDIS] Starting redis via docker compose..."
+    docker compose up -d redis >/dev/null
+    sleep 1
+    if "$PY" - <<'PY' >/dev/null 2>&1
+import redis
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+r.ping()
+PY
+    then
+      echo "[REDIS] redis container online."
+      return
+    fi
+  fi
 
-    python3 agents/chatgpt/worker.py &
-    CHATGPT_PID=$!
-    echo "[LAUNCH] agents/chatgpt/worker.py (PID: $CHATGPT_PID)"
-
-    python3 agents/grok/worker.py &
-    GROK_PID=$!
-    echo "[LAUNCH] agents/grok/worker.py (PID: $GROK_PID)"
-
-    python3 agents/judge/worker.py &
-    JUDGE_PID=$!
-    echo "[LAUNCH] agents/judge/worker.py (PID: $JUDGE_PID)"
-
-    python3 sim/grok_results_listener.py &
-    LISTENER_PID=$!
-    echo "[LAUNCH] sim/grok_results_listener.py (PID: $LISTENER_PID)"
-
-    echo "[LAUNCH] All background workers online."
-    echo "[LAUNCH] Starting orchestrator (foreground)..."
-
-    # Clean up on exit
-    cleanup() {
-        echo "[LAUNCH] Shutting down MCP-FUSION services..."
-        kill "$BROKER_PID" "$CHATGPT_PID" "$GROK_PID" "$JUDGE_PID" "$LISTENER_PID" 2>/dev/null || true
-    }
-    trap cleanup EXIT
-
-    python3 sim/orchestrator.py
+  echo "[ERROR] Redis not reachable on 6379. Start it manually or install redis."
+  exit 1
 }
 
-# --------------------
-# Stop services (reload/stop)
-# --------------------
+cleanup() {
+  echo "[LAUNCH] Shutting down MCP-FUSION services..."
+  for pidfile in "$PID_DIR"/*.pid; do
+    [[ -e "$pidfile" ]] || continue
+    if kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+      kill "$(cat "$pidfile")" 2>/dev/null || true
+    fi
+    rm -f "$pidfile"
+  done
+}
+
+start_workers() {
+  export PYTHONPATH="$WORKSPACE:${PYTHONPATH:-}"
+  ensure_redis
+  PIDS=()
+  for service in "${SERVICES[@]}"; do
+    local log_name pid_file
+    log_name="$LOG_DIR/$(basename "${service%.*}").log"
+    pid_file="$PID_DIR/$(basename "${service%.*}").pid"
+    echo "[LAUNCH] Starting $service"
+    "$PY" "$WORKSPACE/$service" >"$log_name" 2>&1 &
+    pid=$!
+    echo "$pid" >"$pid_file"
+    PIDS+=("$pid")
+  done
+  echo "[LAUNCH] Background workers online."
+}
+
+start_demo() {
+  start_workers
+  trap cleanup EXIT
+  "$PY" "$WORKSPACE/sim/orchestrator.py"
+}
+
+start_daemon() {
+  start_workers
+  echo "[LAUNCH] Daemon mode: workers running without orchestrator; stop with ./scripts/fusion_stop.sh"
+  trap - EXIT
+  wait
+}
+
 stop_services() {
-    echo "[LAUNCH] Stopping any existing MCP-FUSION python processes..."
-    pkill -f "broker/router.py" 2>/dev/null || true
-    pkill -f "agents/chatgpt/worker.py" 2>/dev/null || true
-    pkill -f "agents/grok/worker.py" 2>/dev/null || true
-    pkill -f "agents/judge/worker.py" 2>/dev/null || true
-    pkill -f "sim/grok_results_listener.py" 2>/dev/null || true
-    pkill -f "sim/orchestrator.py" 2>/dev/null || true
-    echo "[LAUNCH] Stop signal sent."
+  echo "[LAUNCH] Stopping MCP-FUSION processes..."
+  cleanup
+  pkill -f "broker/router.py" 2>/dev/null || true
+  pkill -f "agents/chatgpt/worker.py" 2>/dev/null || true
+  pkill -f "agents/grok/worker.py" 2>/dev/null || true
+  pkill -f "agents/judge/worker.py" 2>/dev/null || true
+  pkill -f "sim/grok_results_listener.py" 2>/dev/null || true
+  pkill -f "sim/orchestrator.py" 2>/dev/null || true
+  echo "[LAUNCH] Stop signal sent."
 }
 
-# --------------------------
-# Run Healthcheck
-# --------------------------
 run_healthcheck() {
-    echo "[LAUNCH] Running healthcheck..."
-    # Ensure psutil is installed
-    if ! python3 -c "import psutil" 2>/dev/null; then
-        echo "[WARN] 'psutil' not found. Installing..."
-        pip install psutil
-    fi
-    python3 "$BASE_DIR/tools/healthcheck.py"
+  echo "[LAUNCH] Running healthcheck..."
+  "$PY" -m pip show psutil >/dev/null 2>&1 || "$PY" -m pip install -q psutil
+  "$PY" "$WORKSPACE/tools/healthcheck.py"
 }
 
-# --------------------------
-# Submit a Job
-# --------------------------
 run_submit_job() {
-    local prompt="$1"
-    if [ -z "$prompt" ]; then
-        echo "[ERROR] Job submission requires a prompt."
-        echo "Usage: $0 submit \"Your job prompt here\""
-        exit 1
-    fi
-    echo "[LAUNCH] Submitting single job with prompt: '$prompt'"
-    python3 "$BASE_DIR/tools/submit_job.py" "$prompt"
+  local prompt="$1"
+  if [[ -z "$prompt" ]]; then
+    echo "[ERROR] Job submission requires a prompt."
+    echo "Usage: $0 submit \"Your job prompt here\""
+    exit 1
+  fi
+  echo "[LAUNCH] Submitting job: '$prompt'"
+  "$PY" "$WORKSPACE/tools/submit_job.py" "$prompt"
 }
 
+status_services() {
+  local redis_status="down"
+  if [[ -x "$PY" ]] && "$PY" - <<'PY' >/dev/null 2>&1
+import redis
+redis.Redis(host="localhost", port=6379, decode_responses=True).ping()
+PY
+  then
+    redis_status="up"
+  elif command -v redis-cli >/dev/null 2>&1 && redis-cli -p 6379 ping >/dev/null 2>&1; then
+    redis_status="up"
+  fi
+  echo "[STATUS] redis -> $redis_status"
+  for service in "${SERVICES[@]}" "sim/orchestrator.py"; do
+    if pgrep -f "$service" >/dev/null 2>&1; then
+      echo "[STATUS] $service : running (pid(s) $(pgrep -f "$service" | tr '\n' ' '))"
+    else
+      echo "[STATUS] $service : stopped"
+    fi
+  done
+}
 
-# --------------------
-# Command-line modes
-# --------------------
 COMMAND="${1:-start}"
-PROMPT="${2:-}"
+shift || true
+
+print_header
 
 case "$COMMAND" in
-    start)
-        load_env
-        validate_keys
-        start_services
-        ;;
-    reload)
-        echo "[LAUNCH] RELOAD requested: stopping + reloading .env + restarting services."
-        stop_services
-        load_env
-        validate_keys
-        start_services
-        ;;
-    stop)
-        stop_services
-        ;;
-    health)
-        load_env
-        run_healthcheck
-        ;;
-    submit)
-        load_env
-        run_submit_job "$PROMPT"
-        ;;
-    *)
-        echo "Usage: $0 [start|reload|stop|health|submit \"prompt\"]"
-        exit 1
-        ;;
+  bootstrap)
+    ensure_venv
+    ;;
+  start)
+    ensure_env_file
+    ensure_venv
+    load_env
+    validate_keys
+    enter_workspace
+    if [[ "$MODE" == "daemon" ]]; then
+      start_daemon
+    else
+      start_demo
+    fi
+    ;;
+  reload)
+    stop_services
+    ensure_env_file
+    ensure_venv
+    load_env
+    validate_keys
+    enter_workspace
+    if [[ "$MODE" == "daemon" ]]; then
+      start_daemon
+    else
+      start_demo
+    fi
+    ;;
+  stop)
+    stop_services
+    ;;
+  health)
+  ensure_env_file
+  ensure_venv
+  load_env
+  enter_workspace
+  run_healthcheck
+  ;;
+  submit)
+  ensure_env_file
+  ensure_venv
+  load_env
+  enter_workspace
+  run_submit_job "${1:-}"
+  ;;
+  status)
+    status_services
+    ;;
+  *)
+    echo "Usage: $0 [bootstrap|start|reload|stop|health|submit \"prompt\"|status]"
+    exit 1
+    ;;
 esac

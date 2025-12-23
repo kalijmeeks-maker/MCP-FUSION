@@ -6,23 +6,38 @@ MCP-FUSION is a Model Context Protocol (MCP) "fusion layer" that orchestrates mu
 
 ## One-Button Full Stack (Local)
 
-From the project root (`/Users/kalimeeks/MCP-FUSION`) you can start the full local stack using the macOS-friendly wrapper or the script directly.
+Canonical launcher: `./run_fusion.sh`
 
-- macOS double-click / command wrapper (recommended):
-
+1) Prepare once:
 ```bash
 cd /Users/kalimeeks/MCP-FUSION
-./start-fusion-stack.command
+cp workspace/.env.example workspace/.env   # fill in your keys
+./run_fusion.sh bootstrap                  # create .venv + install deps
 ```
 
-- Script (terminal):
-
+2) Start the stack (redis + workers + orchestrator):
 ```bash
-cd /Users/kalimeeks/MCP-FUSION
-./scripts/start_fusion_stack.sh
+./run_fusion.sh start
 ```
 
-The above brings up the Docker stack (Redis + fusion container) and opens a `tmux` session with the usual panes used for development.
+3) Submit a job from another terminal:
+```bash
+./run_fusion.sh submit "Explain Bitcoin like I'm 5."
+# or use the sample prompt:
+./scripts/submit_sample.sh
+```
+
+4) Health + status:
+```bash
+./run_fusion.sh health
+./run_fusion.sh status
+./run_fusion.sh stop
+```
+
+macOS double-click wrapper still works:
+```bash
+./start-fusion-stack.command   # wraps ./run_fusion.sh start
+```
 
 ## Gemini CLI Integration
 
@@ -101,26 +116,12 @@ Developer-friendly tasks are available in `.vscode/tasks.json` to run the npm sc
 
 ## Day-to-day Commands (Summary)
 
-- One-button full stack launcher (macOS):
-
-```bash
-cd /Users/kalimeeks/MCP-FUSION
-./start-fusion-stack.command
-```
-
-- Gemini sync / helper script:
-
-```bash
-cd /Users/kalimeeks/MCP-FUSION
-./scripts/gemini_sync.sh  # forwards args to gemini CLI if available
-```
-
-- NPM format (Prettier):
-
-```bash
-cd /Users/kalimeeks/MCP-FUSION
-npm run format
-```
+- Start stack: `./run_fusion.sh start` (or double-click `start-fusion-stack.command`)
+- Stop stack: `./run_fusion.sh stop`
+- Health / status: `./run_fusion.sh health` / `./run_fusion.sh status`
+- Submit job: `./run_fusion.sh submit "<prompt>"` or `./scripts/submit_sample.sh`
+- Gemini helper: `./scripts/gemini_sync.sh`
+- Formatting: `npm run format`
 
 ## Contributing & Next Steps
 

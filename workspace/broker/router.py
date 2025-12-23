@@ -1,25 +1,30 @@
 import json
+import os
 import time
 import redis
 
-r = redis.Redis(host="localhost", port=6379, db=0)
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+HEARTBEAT_KEY = "broker_heartbeat"
+HEARTBEAT_CHANNEL = "plasma_heartbeats"
 
-def send_heartbeat():
-    r.publish(
-        "plasma_heartbeats",
-        json.dumps(
-            {
-                "agent": "router",
-                "status": "alive",
-                "timestamp": time.time(),
-            }
-        ),
-    )
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+
+
+def send_heartbeat() -> None:
+    payload = {
+        "agent": "router",
+        "status": "alive",
+        "timestamp": time.time(),
+    }
+    r.publish(HEARTBEAT_CHANNEL, json.dumps(payload))
+    r.set(HEARTBEAT_KEY, payload["timestamp"])
+
 
 p = r.pubsub()
 p.subscribe("plasma_inbox")
 
-print("[ROUTER] Listening on 'plasma_inbox'")
+print(f"[ROUTER] Listening on 'plasma_inbox' via redis://{REDIS_HOST}:{REDIS_PORT}")
 send_heartbeat()
 
 while True:

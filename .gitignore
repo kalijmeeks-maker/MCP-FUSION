@@ -207,4 +207,6 @@ marimo/_lsp/
 __marimo__/
 node_modules/
 workspace/memory/
+workspace/.run/
+workspace/logs/
 *.jsonl

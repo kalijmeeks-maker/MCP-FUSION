@@ -1,19 +1,25 @@
 import os
 import json
+from pathlib import Path
 import numpy as np
 from openai import OpenAI
 
 EMBED_MODEL = "text-embedding-3-large"
-MEMORY_PATH = "/Users/kalimeeks/MCP-FUSION/workspace/memory/memory.json"
+WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
+MEMORY_PATH = WORKSPACE_ROOT / "memory" / "memory.json"
+OFFLINE = os.environ.get("FUSION_OFFLINE", "") == "1"
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def ensure_memory_file():
-    if not os.path.exists(MEMORY_PATH):
+    MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not MEMORY_PATH.exists():
         with open(MEMORY_PATH, "w") as f:
             json.dump({"entries": []}, f)
 
 def embed(text: str):
+    if OFFLINE:
+        return [1.0]
     response = client.embeddings.create(
         model=EMBED_MODEL,
         input=text
@@ -41,6 +47,8 @@ def save_memory(text: str, source: str, metadata=None):
         json.dump(db, f, indent=2)
 
 def search_memory(query: str, limit: int = 5):
+    if OFFLINE:
+        return []
     ensure_memory_file()
     with open(MEMORY_PATH, "r") as f:
         db = json.load(f)

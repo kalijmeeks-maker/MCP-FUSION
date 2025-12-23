@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import json
+import os
 
 import redis
 
-REDIS_HOST = "127.0.0.1"
-REDIS_PORT = 6379
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
 RESULT_CHANNEL = "plasma_results"
 
 
@@ -13,7 +14,7 @@ def main():
     pubsub = client.pubsub()
     pubsub.subscribe(RESULT_CHANNEL)
 
-    print(f"[GROK] Listening for results on '{RESULT_CHANNEL}'...")
+    print(f"[GROK] Listening for results on '{RESULT_CHANNEL}' via redis://{REDIS_HOST}:{REDIS_PORT}...")
 
     for message in pubsub.listen():
         if message["type"] != "message":

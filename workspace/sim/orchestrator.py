@@ -19,7 +19,9 @@ from sim.memory_engine import search_memory, save_memory
 # -------------------------------------------------------------------
 # Redis Connection
 # -------------------------------------------------------------------
-r = redis.Redis(host="localhost", port=6379, db=0)
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 # -------------------------------------------------------------------
 # Simple Role Router
@@ -68,7 +70,7 @@ plan = {
 # Main Execution Function
 # -------------------------------------------------------------------
 def run_plan(plan_data):
-    print("\n[ORCHESTRATOR] Starting session:", plan_data.get("session_id"))
+    print(f"\n[ORCHESTRATOR] Starting session: {plan_data.get('session_id')} (redis://{REDIS_HOST}:{REDIS_PORT})")
     print("[ORCHESTRATOR] Memory search for ‘Bitcoin’?")
     print(search_memory("bitcoin"))
     print("--------------------------------------------------")
