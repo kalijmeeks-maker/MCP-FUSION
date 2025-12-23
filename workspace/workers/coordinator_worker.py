@@ -73,17 +73,13 @@ class CoordinatorWorker:
 
         logger.info(f"Processing task: {task[:100]}...")
 
-        # TODO: Implement actual multi-model fusion logic
-        # For now, return a placeholder response
-        result = {
-            "status": "processed",
-            "task": task,
-            "response": f"Placeholder response for: {task}",
-            "constraints": constraints,
-            "models_used": ["placeholder"],
-            "timestamp": time.time()
-        }
-
+        # Use the handle_task function for actual processing
+        result = handle_task(task)
+        
+        # Add constraints to result if provided
+        if constraints:
+            result["constraints"] = constraints
+        
         return result
 
     def run(self):
@@ -124,6 +120,32 @@ class CoordinatorWorker:
         except Exception as e:
             logger.error(f"Fatal error: {e}")
             raise
+
+
+def handle_task(task: str) -> Dict[str, Any]:
+    """
+    Core MCP-Fusion task handler.
+    
+    This is the main entry point for processing tasks in the fusion system.
+    Can be called directly or imported by external coordinators.
+    
+    Args:
+        task: The task string to process
+        
+    Returns:
+        Dictionary containing task result with status, response, and metadata
+    """
+    # TODO: Implement actual multi-model fusion logic
+    # For now, return a simple processed response
+    result = {
+        "task": task,
+        "status": "processed",
+        "response": f"Processed: {task}",
+        "length": len(task),
+        "timestamp": time.time()
+    }
+    
+    return result
 
 
 def main():

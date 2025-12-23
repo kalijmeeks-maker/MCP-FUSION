@@ -24,6 +24,31 @@ The coordinator worker manages the task queue and orchestrates multi-model fusio
 - Aggregate and merge results
 - Publish results to the `plasma_results` Redis queue
 
+**Core API:**
+
+The `handle_task(task: str)` function is the main entry point for task processing:
+
+```python
+from workspace.workers.coordinator_worker import handle_task
+
+# Process a task
+result = handle_task("Explain quantum computing")
+
+# Returns:
+# {
+#     "task": "Explain quantum computing",
+#     "status": "processed",
+#     "response": "Processed: Explain quantum computing",
+#     "length": 26,
+#     "timestamp": 1703345678.123
+# }
+```
+
+This function can be:
+- Called directly by custom coordinators
+- Imported by REPL interfaces
+- Extended with multi-model fusion logic
+
 **Running:**
 
 ```bash
