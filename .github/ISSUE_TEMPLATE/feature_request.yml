@@ -1,0 +1,77 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide details below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like
+      placeholder: Describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: Describe the problem or use case...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your proposed solution...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: Describe alternatives you've thought about...
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What category does this feature belong to?
+      options:
+        - MCP Server Integration
+        - Agent/Sub-agent Enhancement
+        - Orchestration Logic
+        - Documentation
+        - Testing
+        - DevOps/Tooling
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      description: Check all that apply
+      options:
+        - label: This requires new dependencies
+        - label: This requires breaking changes
+        - label: This requires documentation updates
+        - label: This is a quick win (can be done in < 1 day)
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, mockups, or examples
+      placeholder: Add mockups, links, or examples...

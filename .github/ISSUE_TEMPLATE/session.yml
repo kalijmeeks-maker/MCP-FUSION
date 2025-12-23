@@ -1,0 +1,123 @@
+name: 🧠 Agent Session
+description: Track an active agent conversation or work session
+title: "[Session]: "
+labels: ["session"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this to track active conversations and work sessions with agents.
+
+  - type: input
+    id: session-name
+    attributes:
+      label: Session Name
+      description: A descriptive name for this session
+      placeholder: e.g., "MCP Puppeteer integration session"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent-mode
+    attributes:
+      label: Primary Agent Mode
+      description: Which agent mode is leading this session?
+      options:
+        - Architect Mode (planning & structure)
+        - Coder Mode (implementation)
+        - Critic Mode (review & evaluation)
+        - Scribe Mode (documentation)
+        - Fusion Mode (multi-model reasoning)
+        - Wealth Agent (financial analysis)
+        - Ops Agent (workflow automation)
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Session Objective
+      description: What are we trying to accomplish in this session?
+      placeholder: Describe the main goal...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Background information and relevant context
+      placeholder: |
+        - Related files: 
+        - Previous work: 
+        - Constraints:
+
+  - type: textarea
+    id: progress
+    attributes:
+      label: Progress Tracking
+      description: Track progress as the session continues (update this issue)
+      placeholder: |
+        - [x] Completed item
+        - [ ] In progress item
+        - [ ] Pending item
+      value: |
+        - [ ] Session started
+
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Key Decisions
+      description: Important decisions made during the session
+      placeholder: |
+        1. Decision: ... (Rationale: ...)
+        2. Decision: ... (Rationale: ...)
+
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open Questions
+      description: Questions that need answers or clarification
+      placeholder: |
+        - Question 1: ...
+        - Question 2: ...
+
+  - type: textarea
+    id: models-used
+    attributes:
+      label: Models/Tools Used
+      description: Which LLMs, MCP servers, or tools were involved?
+      placeholder: |
+        - GPT-4
+        - DeepSeek
+        - Puppeteer MCP
+        - Git MCP
+
+  - type: textarea
+    id: outcomes
+    attributes:
+      label: Session Outcomes
+      description: What was produced or learned? (Fill this at session end)
+      placeholder: |
+        - Files created/modified: 
+        - PRs opened: 
+        - Key learnings: 
+        - Next steps:
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Final session summary (Fill this at session end)
+      placeholder: High-level summary of the session...
+
+  - type: checkboxes
+    id: status
+    attributes:
+      label: Session Status
+      description: Current status of this session
+      options:
+        - label: Session active
+        - label: Session paused (waiting for input)
+        - label: Session completed
+        - label: Session archived
