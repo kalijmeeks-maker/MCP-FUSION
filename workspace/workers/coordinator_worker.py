@@ -73,12 +73,8 @@ class CoordinatorWorker:
 
         logger.info(f"Processing task: {task[:100]}...")
 
-        # Use the handle_task function for actual processing
-        result = handle_task(task)
-        
-        # Add constraints to result if provided
-        if constraints:
-            result["constraints"] = constraints
+        # Use the handle_task function with constraints
+        result = handle_task(task, constraints)
         
         return result
 
@@ -122,30 +118,48 @@ class CoordinatorWorker:
             raise
 
 
-def handle_task(task: str) -> Dict[str, Any]:
+def handle_task(task: str, constraints: Dict[str, Any] = None) -> Dict[str, Any]:
     """
     Core MCP-Fusion task handler.
     
+    Canonical MCP-Fusion task entrypoint that processes tasks with optional constraints.
     This is the main entry point for processing tasks in the fusion system.
     Can be called directly or imported by external coordinators.
     
     Args:
         task: The task string to process
+        constraints: Optional dictionary of processing constraints
         
     Returns:
-        Dictionary containing task result with status, response, and metadata
+        Dictionary containing task result with ok status, task, constraints, and metadata
     """
-    # TODO: Implement actual multi-model fusion logic
-    # For now, return a simple processed response
-    result = {
-        "task": task,
-        "status": "processed",
-        "response": f"Processed: {task}",
-        "length": len(task),
-        "timestamp": time.time()
-    }
+    constraints = constraints or {}
     
-    return result
+    try:
+        # TODO: Implement actual multi-model fusion logic
+        # For now, return a simple processed response
+        result = {
+            "ok": True,
+            "task": task,
+            "constraints": constraints,
+            "message": "Task handled successfully",
+            "response": f"Processed: {task}",
+            "length": len(task),
+            "timestamp": time.time()
+        }
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error in handle_task: {e}")
+        return {
+            "ok": False,
+            "task": task,
+            "constraints": constraints,
+            "error": str(e),
+            "message": "Task processing failed",
+            "timestamp": time.time()
+        }
 
 
 def main():

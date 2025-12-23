@@ -26,20 +26,38 @@ The coordinator worker manages the task queue and orchestrates multi-model fusio
 
 **Core API:**
 
-The `handle_task(task: str)` function is the main entry point for task processing:
+The `handle_task(task: str, constraints: dict = None)` function is the main entry point for task processing:
 
 ```python
 from workspace.workers.coordinator_worker import handle_task
 
-# Process a task
+# Process a simple task
 result = handle_task("Explain quantum computing")
 
-# Returns:
+# Process a task with constraints
+result = handle_task(
+    "Explain quantum computing",
+    constraints={"format": "json", "max_tokens": 500}
+)
+
+# Returns on success:
 # {
+#     "ok": True,
 #     "task": "Explain quantum computing",
-#     "status": "processed",
+#     "constraints": {...},
+#     "message": "Task handled successfully",
 #     "response": "Processed: Explain quantum computing",
 #     "length": 26,
+#     "timestamp": 1703345678.123
+# }
+
+# Returns on error:
+# {
+#     "ok": False,
+#     "task": "...",
+#     "constraints": {...},
+#     "error": "Error message",
+#     "message": "Task processing failed",
 #     "timestamp": 1703345678.123
 # }
 ```
@@ -48,6 +66,7 @@ This function can be:
 - Called directly by custom coordinators
 - Imported by REPL interfaces
 - Extended with multi-model fusion logic
+- Used with or without constraints
 
 **Running:**
 
