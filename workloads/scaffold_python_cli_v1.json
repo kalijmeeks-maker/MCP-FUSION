@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "id": "scaffold-python-cli",
+  "description": "Canonical Python CLI scaffold workload",
+  "language": "python",
+  "entrypoint": "generator",
+  "directories": [
+    {"path": "src", "purpose": "source root"},
+    {"path": "tests", "purpose": "tests"}
+  ],
+  "files": [
+    {"path": "README.md", "content": "# Generated Project"},
+    {"path": "requirements.txt", "content": ""},
+    {"path": "src/main.py", "content": "def main():\n    print(\"hello\")\n\nif __name__ == \"__main__\":\n    main()"}
+  ],
+  "commands": [
+    {"name": "setup", "run": "python -m venv venv && source venv/bin/activate"},
+    {"name": "run", "run": "python src/main.py"}
+  ],
+  "constraints": {
+    "format": "json",
+    "no_markdown": true
+  }
+}

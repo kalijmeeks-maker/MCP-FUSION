@@ -1,0 +1,18 @@
+{
+  "schema_version": "2.0",
+  "id": "scaffold-python-cli-v2",
+  "description": "Canonical Python CLI scaffold v2 (pyproject + src layout + options)",
+  "language": "python",
+  "entrypoint": "generator",
+  "options": {
+    "project_name": "scaffold-python-cli-v2",
+    "package_name": "scaffold_python_cli_v2",
+    "description": "Generated Python CLI project (v2).",
+    "license": "MIT",
+    "use_pyproject": true,
+    "src_layout": true,
+    "include_pytest": true,
+    "include_ruff": true
+  },
+  "constraints": { "format": "json", "no_markdown": true }
+}
